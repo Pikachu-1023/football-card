@@ -58,7 +58,7 @@
 
         .card-ovr { position: absolute; top: 6px; left: 8px; font-size: 16px; font-weight: 900; color: #fff; }
         .card-pos { font-size: 10px; color: var(--text-sub); display: block; }
-        .card-img { width: 75px; height: 75px; border-radius: 50%; object-fit: cover; margin-top: 22px; border: 2px solid var(--card-border); background: #000; }
+        .card-img { width: 75px; height: 75px; border-radius: 50%; margin-top: 22px; border: 2px solid var(--card-border); background: #0f172a; }
         .card-name { font-size: 13px; font-weight: bold; margin-top: 6px; text-align: center; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
         .card-nation { font-size: 10px; color: var(--accent-cyan); margin-top: 2px; }
         .card-club { font-size: 10px; color: var(--text-sub); text-align: center; margin-top: 1px; }
@@ -204,16 +204,16 @@
 </div>
 
 <script>
-// 1. 自動生成 300 位球員資料庫 (DATABASE Generator)
+// 生成 100% 穩定的動態 SVG 向量頭像 (解決跨域與防盜鏈破圖)
+function generateAvatarSVG(rarity, pos) {
+    let strokeColor = rarity === 'SSR' ? '%23fbbf24' : (rarity === 'SR' ? '%23a855f7' : '%2338bdf8');
+    let svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%230f172a'/><circle cx='50' cy='36' r='20' fill='${strokeColor}' opacity='0.85'/><path d='M 20 82 C 20 58, 80 58, 80 82 Z' fill='${strokeColor}' opacity='0.85'/><circle cx='50' cy='50' r='46' fill='none' stroke='${strokeColor}' stroke-width='3'/><text x='50%' y='92%' dominant-baseline='middle' text-anchor='middle' fill='%23ffffff' font-size='10' font-weight='bold' font-family='sans-serif'>${pos}</text></svg>`;
+    return `data:image/svg+xml;utf8,${svg}`;
+}
+
 const POSITIONS = ["ST", "LW", "RW", "CAM", "CM", "LB", "LCB", "RCB", "RB", "GK"];
 const CLUBS = ["曼城 (英超)", "皇馬 (西甲)", "拜仁 (德甲)", "巴塞隆納 (西甲)", "阿森納 (英超)", "國米 (意甲)", "巴黎 (法甲)", "自由球員"];
 const NATIONS = ["🇳🇴 挪威", "🇫🇷 法國", "🇧🇪 比利時", "🇧🇷 巴西", "🏴󠁧󠁢󠁥󠁮󠁧󠁿 英格蘭", "🇪🇬 埃及", "🇭🇷 克羅埃西亞", "🇰🇷 韓國", "🇪🇸 西班牙", "🇹🇼 台灣", "🇦🇷 阿根廷", "🇵🇹 葡萄牙"];
-const IMGS = [
-    "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=200&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1518091043644-c1d4457512c6?w=200&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=200&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?w=200&auto=format&fit=crop"
-];
 
 const DATABASE = [];
 
@@ -229,12 +229,16 @@ const STARS = [
 ];
 
 STARS.forEach((s, idx) => {
-    DATABASE.push({ id: `p_${idx+1}`, ...s, img: IMGS[idx % IMGS.length] });
+    DATABASE.push({
+        id: `p_${idx+1}`,
+        ...s,
+        img: generateAvatarSVG(s.rarity, s.pos)
+    });
 });
 
 // 生成剩餘球員至 300 名
 const FIRST_NAMES = ["Alex", "Carlos", "David", "Lucas", "Marco", "Julian", "Gabriel", "Sandro", "Mateo", "Hugo"];
-const LAST_NAMES = ["Silva", "G Garcia", "Müller", "Fernandez", "Kim", "Santos", "Rossi", "Smith", "López", "Johnson"];
+const LAST_NAMES = ["Silva", "Garcia", "Müller", "Fernandez", "Kim", "Santos", "Rossi", "Smith", "López", "Johnson"];
 
 for (let i = DATABASE.length + 1; i <= 300; i++) {
     let rand = Math.random() * 100;
@@ -242,16 +246,17 @@ for (let i = DATABASE.length + 1; i <= 300; i++) {
     let baseOvr = rarity === "SSR" ? 88 + Math.floor(Math.random()*4) : (rarity === "SR" ? 83 + Math.floor(Math.random()*5) : 70 + Math.floor(Math.random()*12));
     let fname = FIRST_NAMES[Math.floor(Math.random() * FIRST_NAMES.length)];
     let lname = LAST_NAMES[Math.floor(Math.random() * LAST_NAMES.length)];
+    let pos = POSITIONS[Math.floor(Math.random() * POSITIONS.length)];
 
     DATABASE.push({
         id: `p_${i}`,
         name: `${fname} ${lname}`,
-        pos: POSITIONS[Math.floor(Math.random() * POSITIONS.length)],
+        pos: pos,
         ovr: baseOvr,
         rarity: rarity,
         nation: NATIONS[Math.floor(Math.random() * NATIONS.length)],
         club: CLUBS[Math.floor(Math.random() * CLUBS.length)],
-        img: IMGS[i % IMGS.length]
+        img: generateAvatarSVG(rarity, pos)
     });
 }
 
@@ -334,7 +339,7 @@ function renderPitch() {
                 count++;
                 slotEl.innerHTML = `
                     <span class="slot-title">${slotKey}</span>
-                    <img src="${p.img}" style="width:50px; height:50px; border-radius:50%; margin-top:15px; border:1px solid #fff;">
+                    <img src="${p.img}" style="width:50px; height:50px; border-radius:50%; margin-top:15px;">
                     <div style="font-size:11px; font-weight:bold; color:#fff; margin-top:4px;">${p.name}</div>
                     <div style="font-size:12px; color:var(--accent-gold); font-weight:900;">${p.ovr}</div>
                 `;
@@ -396,7 +401,7 @@ function renderStages() {
 
     for (let i = 1; i <= 50; i++) {
         let isCleared = i <= playerData.clearedStages;
-        let enemyOvr = 65 + Math.floor(i * 0.9); // 戰力從 65 提升到 110
+        let enemyOvr = 65 + Math.floor(i * 0.9);
         grid.innerHTML += `
             <div class="stage-card ${isCleared ? 'cleared' : ''}" onclick="playPVEStage(${i}, ${enemyOvr})">
                 <div style="font-size:12px; color:var(--text-sub);">第 ${i} 關</div>
@@ -412,7 +417,7 @@ function playPVEStage(stageNum, enemyOvr) {
     if (myScore === 0) return alert("請先排滿 11 人先發陣容！");
 
     let isWin = myScore + (Math.random()*6 - 3) >= enemyOvr;
-    let reward = isWin ? (stageNum * 50 + 200) : 100; // 關卡越後獎金越高
+    let reward = isWin ? (stageNum * 50 + 200) : 100;
     playerData.coins += reward;
 
     if (isWin && stageNum > playerData.clearedStages) {
@@ -450,7 +455,7 @@ function drawGacha(count) {
         if (!playerData.cards.includes(picked.id)) {
             playerData.cards.push(picked.id);
         } else {
-            playerData.coins += 60; // 重複抽取給予額外金幣
+            playerData.coins += 60;
         }
 
         resContainer.innerHTML += buildCardHTML(picked);
