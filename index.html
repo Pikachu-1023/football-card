@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="google" content="notranslate">
-    <title>⚽ 足球卡牌大師 1.0 | 5大聯賽抽卡養成</title>
+    <title>⚽ 足球卡牌大師 2.0 | 11人制陣容與50關闖關</title>
     <style>
         :root {
             --bg-color: #0b0f19;
@@ -20,8 +20,8 @@
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background-color: var(--bg-color); color: var(--text-main); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 20px 10px; }
-        .container { max-width: 1000px; margin: 0 auto; display: flex; flex-direction: column; gap: 15px; }
+        body { background-color: var(--bg-color); color: var(--text-main); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 15px 10px; }
+        .container { max-width: 1050px; margin: 0 auto; display: flex; flex-direction: column; gap: 15px; }
 
         .page-view { display: none; }
         .page-view.active { display: block; }
@@ -39,36 +39,62 @@
         .tab-content.active { display: block; }
 
         /* 🎴 卡牌樣式 */
-        .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; margin-top: 15px; }
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-top: 15px; }
         .soccer-card {
-            width: 100%; height: 250px; border-radius: 14px; position: relative; background: #1e293b;
-            border: 2px solid #334155; padding: 10px; display: flex; flex-direction: column; align-items: center;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.5); transition: transform 0.2s, box-shadow 0.2s; overflow: hidden;
+            width: 100%; height: 230px; border-radius: 12px; position: relative; background: #1e293b;
+            border: 2px solid #334155; padding: 8px; display: flex; flex-direction: column; align-items: center;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.4); transition: transform 0.2s; overflow: hidden; cursor: pointer;
         }
-        .soccer-card:hover { transform: translateY(-5px); box-shadow: 0 12px 24px rgba(56, 189, 248, 0.3); }
-        .soccer-card.SSR { border-color: var(--accent-gold); background: linear-gradient(145deg, #2a1f00, #1e1b18); box-shadow: 0 0 12px rgba(251, 191, 36, 0.4); }
+        .soccer-card:hover { transform: translateY(-4px); }
+        .soccer-card.SSR { border-color: var(--accent-gold); background: linear-gradient(145deg, #2a1f00, #1e1b18); }
         .soccer-card.SR { border-color: var(--accent-purple); background: linear-gradient(145deg, #1e102d, #181528); }
         .soccer-card.R { border-color: var(--accent-cyan); }
-        .soccer-card.locked { filter: grayscale(100%); opacity: 0.35; }
+        .soccer-card.locked { filter: grayscale(100%); opacity: 0.3; }
 
-        .card-rarity { position: absolute; top: 8px; right: 10px; font-weight: 900; font-size: 12px; }
+        .card-rarity { position: absolute; top: 6px; right: 8px; font-weight: 900; font-size: 11px; }
         .card-rarity.SSR { color: var(--accent-gold); }
         .card-rarity.SR { color: var(--accent-purple); }
         .card-rarity.R { color: var(--accent-cyan); }
 
-        .card-ovr { position: absolute; top: 8px; left: 10px; font-size: 18px; font-weight: 900; color: #fff; }
+        .card-ovr { position: absolute; top: 6px; left: 8px; font-size: 16px; font-weight: 900; color: #fff; }
         .card-pos { font-size: 10px; color: var(--text-sub); display: block; }
-        .card-img { width: 85px; height: 85px; border-radius: 50%; object-fit: cover; margin-top: 25px; border: 2px solid var(--card-border); background: #000; }
-        .card-name { font-size: 14px; font-weight: bold; margin-top: 8px; text-align: center; color: #fff; }
-        .card-nation { font-size: 11px; color: var(--accent-cyan); font-weight: 600; margin-top: 2px; }
-        .card-club { font-size: 11px; color: var(--text-sub); text-align: center; margin-top: 1px; }
+        .card-img { width: 75px; height: 75px; border-radius: 50%; object-fit: cover; margin-top: 22px; border: 2px solid var(--card-border); background: #000; }
+        .card-name { font-size: 13px; font-weight: bold; margin-top: 6px; text-align: center; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
+        .card-nation { font-size: 10px; color: var(--accent-cyan); margin-top: 2px; }
+        .card-club { font-size: 10px; color: var(--text-sub); text-align: center; margin-top: 1px; }
+
+        /* ⚽ 11 人足球場排陣區 (Pitch Layout) */
+        .pitch-container {
+            background: linear-gradient(180deg, #15803d, #166534); border: 4px solid #fff; border-radius: 16px;
+            padding: 20px 10px; display: flex; flex-direction: column; gap: 20px; position: relative; margin-top: 15px;
+            box-shadow: inset 0 0 50px rgba(0,0,0,0.5);
+        }
+        .pitch-row { display: flex; justify-content: space-around; align-items: center; }
+        .pitch-slot {
+            width: 100px; height: 130px; background: rgba(0,0,0,0.4); border: 2px dashed rgba(255,255,255,0.5);
+            border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            cursor: pointer; position: relative; transition: all 0.2s;
+        }
+        .pitch-slot:hover { border-color: var(--accent-gold); background: rgba(0,0,0,0.6); }
+        .slot-title { position: absolute; top: 4px; font-size: 10px; color: var(--accent-gold); font-weight: bold; }
+
+        /* 🎮 50 關 PVE 關卡列表 */
+        .stage-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; margin-top: 15px; max-height: 400px; overflow-y: auto; padding-right: 5px; }
+        .stage-card {
+            background: #1e293b; border: 1px solid var(--card-border); border-radius: 8px; padding: 10px;
+            text-align: center; cursor: pointer; transition: 0.2s;
+        }
+        .stage-card:hover { border-color: var(--accent-cyan); background: #334155; }
+        .stage-card.cleared { border-color: var(--accent-green); background: #064e3b; }
 
         /* 按鈕樣式 */
         .action-btn { background: #1e293b; color: #fff; border: 1px solid var(--card-border); padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; }
         .btn-gold { background: linear-gradient(135deg, #eab308, #ca8a04); color: #000; }
         .btn-purple { background: linear-gradient(135deg, #a855f7, #7e22ce); color: #fff; }
 
-        .gacha-display { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 20px; min-height: 250px; }
+        /* Modal 選擇彈窗 */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 999; justify-content: center; align-items: center; }
+        .modal-content { background: var(--card-bg); width: 90%; max-width: 600px; border-radius: 16px; padding: 20px; max-height: 80vh; overflow-y: auto; border: 1px solid var(--card-border); }
     </style>
 </head>
 <body class="notranslate">
@@ -78,34 +104,77 @@
     <!-- 登入頁面 -->
     <div id="view-auth" class="page-view active">
         <div class="auth-container">
-            <h2 style="color:var(--accent-cyan);">⚽ 足球卡牌大師</h2>
-            <p style="color:var(--text-sub); font-size:13px; margin-bottom:15px;">五大聯賽球星蒐集與卡牌對戰</p>
+            <h2 style="color:var(--accent-cyan);">⚽ 足球卡牌大師 2.0</h2>
+            <p style="color:var(--text-sub); font-size:13px; margin-bottom:15px;">300+球員庫 × 11人制排陣 × 50關闖關</p>
             <input type="text" id="auth-user" class="auth-input" placeholder="輸入玩家帳號">
-            <button class="action-btn btn-gold" style="width:100%; margin-top:10px;" onclick="handleLogin()">開始集卡征戰</button>
+            <button class="action-btn btn-gold" style="width:100%; margin-top:10px;" onclick="handleLogin()">進入球場</button>
         </div>
     </div>
 
     <!-- 主遊戲介面 -->
     <div id="view-game" class="page-view">
         <div class="header-card">
-            <h1>⚽ 足球卡牌大師 (FTCG)</h1>
+            <h1>⚽ 足球卡牌大師 (FTCG 2.0)</h1>
             <p style="font-size:13px; color:var(--accent-gold); margin-top:5px;">
-                👤 經理人：<span id="player-id">-</span> | 💰 金幣：$<span id="player-coins">1000</span> | 🏆 團隊總戰力：<span id="team-ovr">0</span>
+                👤 經理人：<span id="player-id">-</span> | 💰 金幣：$<span id="player-coins">1500</span> | 🏆 首發陣容總戰力：<span id="team-ovr">0</span>
             </p>
             <button onclick="handleLogout()" style="position:absolute; right:15px; top:15px; background:var(--accent-rose); border:none; color:#fff; padding:6px 12px; border-radius:6px; cursor:pointer;">登出</button>
         </div>
 
         <div class="tab-bar">
-            <button class="tab-btn active" onclick="switchTab(event, 'tab-gacha')">🎰 球星抽卡</button>
-            <button class="tab-btn" onclick="switchTab(event, 'tab-album')">📖 卡牌庫 (<span id="album-count">0</span>/12)</button>
-            <button class="tab-btn" onclick="switchTab(event, 'tab-squad')">👕 我的最佳陣容</button>
-            <button class="tab-btn" onclick="switchTab(event, 'tab-arena')">⚔️ 100人卡牌天梯</button>
+            <button class="tab-btn active" onclick="switchTab(event, 'tab-squad')">👕 11人制排陣</button>
+            <button class="tab-btn" onclick="switchTab(event, 'tab-pve')">⚔️ 50關電腦闖關</button>
+            <button class="tab-btn" onclick="switchTab(event, 'tab-gacha')">🎰 球星抽卡</button>
+            <button class="tab-btn" onclick="switchTab(event, 'tab-album')">📖 卡牌圖鑑 (<span id="album-count">0</span>/300)</button>
         </div>
 
-        <!-- 1. 抽卡系統 -->
-        <div id="tab-gacha" class="tab-content active" style="text-align:center;">
-            <h3>🌟 五大聯賽球星卡池</h3>
-            <p style="color:var(--text-sub); font-size:13px; margin-top:5px;">包含 SSR Haaland, Mbappé, De Bruyne 等現役超級巨星！</p>
+        <!-- 1. 11 人制陣容 (4-3-3 戰術) -->
+        <div id="tab-squad" class="tab-content active">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3>👕 最佳 11 人首發陣容 (4-3-3 陣型)</h3>
+                <button class="action-btn btn-gold" onclick="autoOptimizeSquad()">✨ 自動最佳化首發</button>
+            </div>
+            <p style="color:var(--text-sub); font-size:12px; margin-top:4px;">點擊場上的位置格子，即可從你擁有的球員庫中安排先發！</p>
+            
+            <div class="pitch-container">
+                <!-- 前鋒 (Forward) -->
+                <div class="pitch-row">
+                    <div class="pitch-slot" onclick="openPicker('LW')" id="slot-LW"><span class="slot-title">左翼 LW</span></div>
+                    <div class="pitch-slot" onclick="openPicker('ST')" id="slot-ST"><span class="slot-title">中鋒 ST</span></div>
+                    <div class="pitch-slot" onclick="openPicker('RW')" id="slot-RW"><span class="slot-title">右翼 RW</span></div>
+                </div>
+                <!-- 中場 (Midfield) -->
+                <div class="pitch-row">
+                    <div class="pitch-slot" onclick="openPicker('LCM')" id="slot-LCM"><span class="slot-title">左中場 LCM</span></div>
+                    <div class="pitch-slot" onclick="openPicker('CAM')" id="slot-CAM"><span class="slot-title">進攻中場 CAM</span></div>
+                    <div class="pitch-slot" onclick="openPicker('RCM')" id="slot-RCM"><span class="slot-title">右中場 RCM</span></div>
+                </div>
+                <!-- 後衛 (Defender) -->
+                <div class="pitch-row">
+                    <div class="pitch-slot" onclick="openPicker('LB')" id="slot-LB"><span class="slot-title">左後衛 LB</span></div>
+                    <div class="pitch-slot" onclick="openPicker('LCB')" id="slot-LCB"><span class="slot-title">左中衛 LCB</span></div>
+                    <div class="pitch-slot" onclick="openPicker('RCB')" id="slot-RCB"><span class="slot-title">右中衛 RCB</span></div>
+                    <div class="pitch-slot" onclick="openPicker('RB')" id="slot-RB"><span class="slot-title">右後衛 RB</span></div>
+                </div>
+                <!-- 門將 (Goalkeeper) -->
+                <div class="pitch-row">
+                    <div class="pitch-slot" onclick="openPicker('GK')" id="slot-GK"><span class="slot-title">守門員 GK</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. 50 關 PVE 闖關模式 -->
+        <div id="tab-pve" class="tab-content">
+            <h3>⚔️ 電腦聯賽闖關 (50 關)</h3>
+            <p style="color:var(--text-sub); font-size:13px;">挑戰越來越強的電腦球隊，贏取大量金幣抽卡！</p>
+            <div id="pve-log" style="background:#0b0f19; padding:12px; border-radius:8px; font-size:13px; margin-top:10px; color:var(--accent-cyan);">選擇關卡開始比賽...</div>
+            <div id="stage-grid" class="stage-grid"></div>
+        </div>
+
+        <!-- 3. 抽卡系統 -->
+        <div id="tab-gacha" class="tab-content" style="text-align:center;">
+            <h3>🌟 五大聯賽球星卡池 (300位球員)</h3>
+            <p style="color:var(--text-sub); font-size:13px; margin-top:5px;">包含 SSR Haaland, Mbappé, Messi, Ronaldo 等全球巨星！</p>
             <p style="color:var(--accent-gold); font-size:12px;">機率：SSR 5% | SR 25% | R 70%</p>
             
             <div style="margin: 20px 0; display:flex; justify-content:center; gap:15px;">
@@ -113,64 +182,100 @@
                 <button class="action-btn btn-purple" onclick="drawGacha(10)">🔥 10 連抽 ($1800 優惠)</button>
             </div>
 
-            <div id="gacha-result" class="gacha-display"></div>
+            <div id="gacha-result" style="display:flex; justify-content:center; gap:10px; flex-wrap:wrap; margin-top:20px; min-height:220px;"></div>
         </div>
 
-        <!-- 2. 卡牌圖鑑庫 -->
+        <!-- 4. 卡牌圖鑑庫 -->
         <div id="tab-album" class="tab-content">
-            <h3>📖 球星圖鑑庫</h3>
-            <p style="color:var(--text-sub); font-size:13px;">收集五大聯賽球員，提升你的卡牌庫收藏率！</p>
+            <h3>📖 球星全圖鑑 (300位)</h3>
             <div id="album-grid" class="card-grid"></div>
-        </div>
-
-        <!-- 3. 我的陣容 -->
-        <div id="tab-squad" class="tab-content">
-            <h3>👕 最佳首發陣容</h3>
-            <p style="color:var(--text-sub); font-size:13px;">系統自動選出你擁有的最高戰力球員組成先發隊伍！</p>
-            <div id="squad-grid" class="card-grid"></div>
-        </div>
-
-        <!-- 4. 天梯戰術競技場 -->
-        <div id="tab-arena" class="tab-content">
-            <h3>⚔️ 100 人卡牌天梯賽</h3>
-            <p style="color:var(--text-sub); font-size:13px;">憑藉先發陣容戰力與策略挑戰全球球隊！</p>
-            <button class="action-btn btn-gold" style="width:100%; margin: 15px 0;" onclick="playRankedMatch()">🔍 匹配天梯對手</button>
-            <div id="arena-log" style="background:#0b0f19; padding:12px; border-radius:8px; font-size:13px; min-height:100px;">準備迎戰...</div>
         </div>
     </div>
 
 </div>
 
+<!-- 球員選擇彈窗 Modal -->
+<div id="picker-modal" class="modal">
+    <div class="modal-content">
+        <h3 id="picker-title" style="margin-bottom:10px;">選擇先發球員</h3>
+        <div id="picker-grid" class="card-grid"></div>
+        <button class="action-btn" style="width:100%; margin-top:15px;" onclick="closePicker()">關閉</button>
+    </div>
+</div>
+
 <script>
-// 使用穩定 CDN 圖片並標註真實國家名
-const DATABASE = [
-    { id: "p1", name: "E. Haaland", nation: "🇳🇴 挪威", club: "曼城 (英超)", pos: "ST", ovr: 91, rarity: "SSR", img: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=300&auto=format&fit=crop" },
-    { id: "p2", name: "K. Mbappé", nation: "🇫🇷 法國", club: "皇馬 (西甲)", pos: "ST", ovr: 91, rarity: "SSR", img: "https://images.unsplash.com/photo-1518091043644-c1d4457512c6?w=300&auto=format&fit=crop" },
-    { id: "p3", name: "K. De Bruyne", nation: "🇧🇪 比利時", club: "曼城 (英超)", pos: "CM", ovr: 90, rarity: "SSR", img: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=300&auto=format&fit=crop" },
-    { id: "p4", name: "Vinícius Jr.", nation: "🇧🇷 巴西", club: "皇馬 (西甲)", pos: "LW", ovr: 90, rarity: "SSR", img: "https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?w=300&auto=format&fit=crop" },
-    { id: "p5", name: "H. Kane", nation: "🏴󠁧󠁢󠁥󠁮󠁧󠁿 英格蘭", club: "拜仁 (德甲)", pos: "ST", ovr: 89, rarity: "SR", img: "https://images.unsplash.com/photo-1517927033932-b3d18e61fb3a?w=300&auto=format&fit=crop" },
-    { id: "p6", name: "M. Salah", nation: "🇪🇬 埃及", club: "利物浦 (英超)", pos: "RW", ovr: 89, rarity: "SR", img: "https://images.unsplash.com/photo-1511886929837-354d827aae26?w=300&auto=format&fit=crop" },
-    { id: "p7", name: "J. Bellingham", nation: "🏴󠁧󠁢󠁥󠁮󠁧󠁿 英格蘭", club: "皇馬 (西甲)", pos: "CAM", ovr: 89, rarity: "SR", img: "https://images.unsplash.com/photo-1560272564-669520557220?w=300&auto=format&fit=crop" },
-    { id: "p8", name: "L. Modrić", nation: "🇭🇷 克羅埃西亞", club: "皇馬 (西甲)", pos: "CM", ovr: 86, rarity: "SR", img: "https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=300&auto=format&fit=crop" },
-    { id: "p9", name: "Bukayo Saka", nation: "🏴󠁧󠁢󠁥󠁮󠁧󠁿 英格蘭", club: "阿森納 (英超)", pos: "RW", ovr: 87, rarity: "SR", img: "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=300&auto=format&fit=crop" },
-    { id: "p10", name: "Son Heung-min", nation: "🇰🇷 韓國", club: "熱刺 (英超)", pos: "LW", ovr: 87, rarity: "R", img: "https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=300&auto=format&fit=crop" },
-    { id: "p11", name: "Pedri", nation: "🇪🇸 西班牙", club: "巴塞隆納 (西甲)", pos: "CM", ovr: 86, rarity: "R", img: "https://images.unsplash.com/photo-1575361204480-aadea25e6e68?w=300&auto=format&fit=crop" },
-    { id: "p12", name: "Zhenhe Son", nation: "🇹🇼 台灣", club: "自由球員", pos: "CAM", ovr: 99, rarity: "SSR", img: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=300&auto=format&fit=crop" }
+// 1. 自動生成 300 位球員資料庫 (DATABASE Generator)
+const POSITIONS = ["ST", "LW", "RW", "CAM", "CM", "LB", "LCB", "RCB", "RB", "GK"];
+const CLUBS = ["曼城 (英超)", "皇馬 (西甲)", "拜仁 (德甲)", "巴塞隆納 (西甲)", "阿森納 (英超)", "國米 (意甲)", "巴黎 (法甲)", "自由球員"];
+const NATIONS = ["🇳🇴 挪威", "🇫🇷 法國", "🇧🇪 比利時", "🇧🇷 巴西", "🏴󠁧󠁢󠁥󠁮󠁧󠁿 英格蘭", "🇪🇬 埃及", "🇭🇷 克羅埃西亞", "🇰🇷 韓國", "🇪🇸 西班牙", "🇹🇼 台灣", "🇦🇷 阿根廷", "🇵🇹 葡萄牙"];
+const IMGS = [
+    "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=200&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1518091043644-c1d4457512c6?w=200&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=200&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?w=200&auto=format&fit=crop"
 ];
 
+const DATABASE = [];
+
+// 著名頭牌巨星
+const STARS = [
+    { name: "E. Haaland", pos: "ST", ovr: 92, rarity: "SSR", nation: "🇳🇴 挪威", club: "曼城 (英超)" },
+    { name: "K. Mbappé", pos: "ST", ovr: 92, rarity: "SSR", nation: "🇫🇷 法國", club: "皇馬 (西甲)" },
+    { name: "L. Messi", pos: "RW", ovr: 91, rarity: "SSR", nation: "🇦🇷 阿根廷", club: "自由球員" },
+    { name: "C. Ronaldo", pos: "ST", ovr: 90, rarity: "SSR", nation: "🇵🇹 葡萄牙", club: "自由球員" },
+    { name: "K. De Bruyne", pos: "CAM", ovr: 91, rarity: "SSR", nation: "🇧🇪 比利時", club: "曼城 (英超)" },
+    { name: "Vinícius Jr.", pos: "LW", ovr: 90, rarity: "SSR", nation: "🇧🇷 巴西", club: "皇馬 (西甲)" },
+    { name: "Zhenhe Son", pos: "CAM", ovr: 99, rarity: "SSR", nation: "🇹🇼 台灣", club: "自由球員" }
+];
+
+STARS.forEach((s, idx) => {
+    DATABASE.push({ id: `p_${idx+1}`, ...s, img: IMGS[idx % IMGS.length] });
+});
+
+// 生成剩餘球員至 300 名
+const FIRST_NAMES = ["Alex", "Carlos", "David", "Lucas", "Marco", "Julian", "Gabriel", "Sandro", "Mateo", "Hugo"];
+const LAST_NAMES = ["Silva", "G Garcia", "Müller", "Fernandez", "Kim", "Santos", "Rossi", "Smith", "López", "Johnson"];
+
+for (let i = DATABASE.length + 1; i <= 300; i++) {
+    let rand = Math.random() * 100;
+    let rarity = rand < 5 ? "SSR" : (rand < 30 ? "SR" : "R");
+    let baseOvr = rarity === "SSR" ? 88 + Math.floor(Math.random()*4) : (rarity === "SR" ? 83 + Math.floor(Math.random()*5) : 70 + Math.floor(Math.random()*12));
+    let fname = FIRST_NAMES[Math.floor(Math.random() * FIRST_NAMES.length)];
+    let lname = LAST_NAMES[Math.floor(Math.random() * LAST_NAMES.length)];
+
+    DATABASE.push({
+        id: `p_${i}`,
+        name: `${fname} ${lname}`,
+        pos: POSITIONS[Math.floor(Math.random() * POSITIONS.length)],
+        ovr: baseOvr,
+        rarity: rarity,
+        nation: NATIONS[Math.floor(Math.random() * NATIONS.length)],
+        club: CLUBS[Math.floor(Math.random() * CLUBS.length)],
+        img: IMGS[i % IMGS.length]
+    });
+}
+
+// 2. 遊戲狀態與存檔
 let currentUser = null;
-let playerData = { coins: 1000, cards: [] };
+let playerData = {
+    coins: 1500,
+    cards: ["p_1", "p_2", "p_3", "p_4", "p_5", "p_6", "p_7"], // 初始預設擁有的球員
+    squad: { LW: null, ST: null, RW: null, LCM: null, CAM: null, RCM: null, LB: null, LCB: null, RCB: null, RB: null, GK: null },
+    clearedStages: 0
+};
+
+let currentSelectingSlot = null;
 
 function handleLogin() {
     let u = document.getElementById('auth-user').value.trim();
     if (!u) return alert("請輸入帳號");
     currentUser = u;
 
-    let local = localStorage.getItem('ftcg_user_' + u);
+    let local = localStorage.getItem('ftcg2_user_' + u);
     if (local) {
         playerData = JSON.parse(local);
     } else {
-        playerData = { coins: 1200, cards: ["p10"] };
+        autoOptimizeSquad();
         saveData();
     }
 
@@ -188,20 +293,21 @@ function handleLogout() {
 
 function saveData() {
     if (currentUser) {
-        localStorage.setItem('ftcg_user_' + currentUser, JSON.stringify(playerData));
+        localStorage.setItem('ftcg2_user_' + currentUser, JSON.stringify(playerData));
     }
 }
 
 function updateUI() {
     document.getElementById('player-coins').textContent = playerData.coins;
     document.getElementById('album-count').textContent = playerData.cards.length;
+    renderPitch();
+    renderStages();
     renderAlbum();
-    renderSquad();
 }
 
-function buildCardHTML(p, isLocked = false) {
+function buildCardHTML(p, isLocked = false, onClickFn = '') {
     return `
-        <div class="soccer-card ${p.rarity} ${isLocked ? 'locked' : ''}">
+        <div class="soccer-card ${p.rarity} ${isLocked ? 'locked' : ''}" onclick="${onClickFn}">
             <span class="card-ovr">${p.ovr}<span class="card-pos">${p.pos}</span></span>
             <span class="card-rarity ${p.rarity}">${p.rarity}</span>
             <img class="card-img" src="${p.img}" alt="${p.name}">
@@ -212,9 +318,121 @@ function buildCardHTML(p, isLocked = false) {
     `;
 }
 
+// 3. 排陣系統
+function renderPitch() {
+    let totalOvr = 0;
+    let count = 0;
+
+    Object.keys(playerData.squad).forEach(slotKey => {
+        let slotEl = document.getElementById(`slot-${slotKey}`);
+        let cardId = playerData.squad[slotKey];
+        
+        if (cardId) {
+            let p = DATABASE.find(x => x.id === cardId);
+            if (p) {
+                totalOvr += p.ovr;
+                count++;
+                slotEl.innerHTML = `
+                    <span class="slot-title">${slotKey}</span>
+                    <img src="${p.img}" style="width:50px; height:50px; border-radius:50%; margin-top:15px; border:1px solid #fff;">
+                    <div style="font-size:11px; font-weight:bold; color:#fff; margin-top:4px;">${p.name}</div>
+                    <div style="font-size:12px; color:var(--accent-gold); font-weight:900;">${p.ovr}</div>
+                `;
+                return;
+            }
+        }
+        slotEl.innerHTML = `<span class="slot-title">${slotKey}</span><span style="font-size:24px; color:rgba(255,255,255,0.4); margin-top:20px;">+</span>`;
+    });
+
+    let avgOvr = count > 0 ? Math.floor(totalOvr / count) : 0;
+    document.getElementById('team-ovr').textContent = avgOvr;
+}
+
+function openPicker(slotKey) {
+    currentSelectingSlot = slotKey;
+    document.getElementById('picker-title').textContent = `選擇 ${slotKey} 位置先發球員`;
+    let grid = document.getElementById('picker-grid');
+    grid.innerHTML = '';
+
+    let owned = DATABASE.filter(p => playerData.cards.includes(p.id));
+    owned.sort((a,b) => b.ovr - a.ovr);
+
+    owned.forEach(p => {
+        grid.innerHTML += buildCardHTML(p, false, `selectPlayerForSlot('${p.id}')`);
+    });
+
+    document.getElementById('picker-modal').style.display = 'flex';
+}
+
+function selectPlayerForSlot(cardId) {
+    playerData.squad[currentSelectingSlot] = cardId;
+    closePicker();
+    saveData();
+    updateUI();
+}
+
+function closePicker() {
+    document.getElementById('picker-modal').style.display = 'none';
+}
+
+function autoOptimizeSquad() {
+    let owned = DATABASE.filter(p => playerData.cards.includes(p.id));
+    owned.sort((a,b) => b.ovr - a.ovr);
+
+    let slots = Object.keys(playerData.squad);
+    slots.forEach((slot, idx) => {
+        if (owned[idx]) {
+            playerData.squad[slot] = owned[idx].id;
+        }
+    });
+    saveData();
+    updateUI();
+}
+
+// 4. 50 關 PVE 闖關系統
+function renderStages() {
+    let grid = document.getElementById('stage-grid');
+    grid.innerHTML = '';
+
+    for (let i = 1; i <= 50; i++) {
+        let isCleared = i <= playerData.clearedStages;
+        let enemyOvr = 65 + Math.floor(i * 0.9); // 戰力從 65 提升到 110
+        grid.innerHTML += `
+            <div class="stage-card ${isCleared ? 'cleared' : ''}" onclick="playPVEStage(${i}, ${enemyOvr})">
+                <div style="font-size:12px; color:var(--text-sub);">第 ${i} 關</div>
+                <div style="font-weight:bold; color:var(--accent-gold); font-size:14px;">OVR ${enemyOvr}</div>
+                <div style="font-size:11px; margin-top:4px;">${isCleared ? '✅ 已通關' : '⚔️ 挑戰'}</div>
+            </div>
+        `;
+    }
+}
+
+function playPVEStage(stageNum, enemyOvr) {
+    let myScore = parseInt(document.getElementById('team-ovr').textContent);
+    if (myScore === 0) return alert("請先排滿 11 人先發陣容！");
+
+    let isWin = myScore + (Math.random()*6 - 3) >= enemyOvr;
+    let reward = isWin ? (stageNum * 50 + 200) : 100; // 關卡越後獎金越高
+    playerData.coins += reward;
+
+    if (isWin && stageNum > playerData.clearedStages) {
+        playerData.clearedStages = stageNum;
+    }
+
+    document.getElementById('pve-log').innerHTML = `
+        ⚔️ <b>第 ${stageNum} 關對決結果：</b><br>
+        你的首發戰力：<b>${myScore}</b> vs 電腦戰力：<b>${enemyOvr}</b><br>
+        比賽結果：<b style="color:${isWin ? 'var(--accent-gold)' : 'var(--accent-rose)'}">${isWin ? `🎉 勝利！(獲得 $${reward})` : `❌ 敗北 (獲得 $${reward} 鼓勵金)`}</b>
+    `;
+
+    saveData();
+    updateUI();
+}
+
+// 5. 抽卡機制
 function drawGacha(count) {
     let cost = count === 1 ? 200 : 1800;
-    if (playerData.coins < cost) return alert("金幣不足！");
+    if (playerData.coins < cost) return alert("金幣不足！請多打 PVE 關卡賺取獎金！");
 
     playerData.coins -= cost;
     let resContainer = document.getElementById('gacha-result');
@@ -232,7 +450,7 @@ function drawGacha(count) {
         if (!playerData.cards.includes(picked.id)) {
             playerData.cards.push(picked.id);
         } else {
-            playerData.coins += 50;
+            playerData.coins += 60; // 重複抽取給予額外金幣
         }
 
         resContainer.innerHTML += buildCardHTML(picked);
@@ -242,6 +460,7 @@ function drawGacha(count) {
     updateUI();
 }
 
+// 6. 圖鑑展示
 function renderAlbum() {
     let grid = document.getElementById('album-grid');
     grid.innerHTML = '';
@@ -251,48 +470,11 @@ function renderAlbum() {
     });
 }
 
-function renderSquad() {
-    let grid = document.getElementById('squad-grid');
-    grid.innerHTML = '';
-    let owned = DATABASE.filter(p => playerData.cards.includes(p.id));
-    owned.sort((a,b) => b.ovr - a.ovr);
-
-    let totalOvr = 0;
-    owned.forEach(p => {
-        totalOvr += p.ovr;
-        grid.innerHTML += buildCardHTML(p);
-    });
-
-    let teamScore = owned.length > 0 ? Math.floor(totalOvr / owned.length) : 0;
-    document.getElementById('team-ovr').textContent = teamScore;
-}
-
 function switchTab(evt, tabId) {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
     evt.currentTarget.classList.add('active');
     document.getElementById(tabId).classList.add('active');
-}
-
-function playRankedMatch() {
-    let owned = DATABASE.filter(p => playerData.cards.includes(p.id));
-    if (owned.length === 0) return alert("隊伍中尚無任何球員！");
-
-    let myScore = owned.reduce((sum, p) => sum + p.ovr, 0) / owned.length;
-    let oppScore = 75 + Math.floor(Math.random() * 20);
-
-    let isWin = myScore >= oppScore;
-    let reward = isWin ? 300 : 100;
-    playerData.coins += reward;
-
-    document.getElementById('arena-log').innerHTML = `
-        ⚔️ 天梯對決結果：<br>
-        你的陣容平均戰力：<b>${Math.floor(myScore)}</b> vs 對手戰力：<b>${oppScore}</b><br>
-        比賽結果：<b style="color:${isWin ? 'var(--accent-gold)' : 'var(--accent-rose)'}">${isWin ? '勝利 (獲得 $300)' : '敗北 (獲得 $100)'}</b>
-    `;
-
-    saveData();
-    updateUI();
 }
 </script>
 </body>
