@@ -78,12 +78,16 @@
         }
         .pitch-row { display: flex; justify-content: space-around; align-items: center; }
         .pitch-slot {
-            width: 95px; height: 125px; background: rgba(0,0,0,0.4); border: 2px dashed rgba(255,255,255,0.5);
+            width: 100px; height: 130px; background: rgba(0,0,0,0.4); border: 2px dashed rgba(255,255,255,0.5);
             border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            cursor: pointer; position: relative; transition: all 0.2s;
+            cursor: pointer; position: relative; transition: all 0.2s; padding: 5px; text-align: center;
         }
         .pitch-slot:hover, .pitch-slot.active-slot { border-color: var(--accent-gold); background: rgba(0,0,0,0.7); transform: scale(1.05); }
         .slot-title { position: absolute; top: 4px; font-size: 10px; color: var(--accent-gold); font-weight: bold; }
+
+        .pitch-player-avatar { width: 48px; height: 48px; border-radius: 50%; border: 2px solid #fff; margin-top: 15px; object-fit: cover; }
+        .pitch-player-name { font-size: 11px; font-weight: bold; color: #fff; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
+        .pitch-player-ovr { font-size: 11px; color: var(--accent-gold); font-weight: 900; }
 
         /* 內嵌選擇替換區 */
         .inline-panel { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 15px; margin-top: 15px; display: none; }
@@ -247,26 +251,25 @@
 </div>
 
 <script>
-// 使用本地 Canvas/SVG 動態生成高品質球員圖像 Data URI，100% 不會破圖或載入失敗
-function generateAvatarSVG(name, isSpecial = false) {
-    let parts = name.split(' ');
-    let initials = parts.length > 1 ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase() : name.substring(0, 2).toUpperCase();
-    
-    let bgGradient = isSpecial ? '%233b82f6' : '%231e293b';
-    let textCol = isSpecial ? '%23fbbf24' : '%2338bdf8';
+// 生成繪製 SVG Data URI
+function generateAvatarSVG(name, isSpecial) {
+    var parts = name.split(' ');
+    var initials = parts.length > 1 ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase() : name.substring(0, 2).toUpperCase();
+    var bgCol = isSpecial ? '%233b82f6' : '%231e293b';
+    var txtCol = isSpecial ? '%23fbbf24' : '%2338bdf8';
 
-    let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100">
-        <rect width="100" height="100" fill="${bgGradient}"/>
-        <circle cx="50" cy="38" r="22" fill="%23334155"/>
-        <path d="M 20 88 C 20 62, 80 62, 80 88 Z" fill="%23334155"/>
-        <text x="50" y="52" font-family="Arial, sans-serif" font-size="28" font-weight="900" fill="${textCol}" text-anchor="middle">${initials}</text>
-    </svg>`;
+    var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100">' +
+        '<rect width="100" height="100" fill="' + bgCol + '"/>' +
+        '<circle cx="50" cy="38" r="22" fill="%23334155"/>' +
+        '<path d="M 20 88 C 20 62, 80 62, 80 88 Z" fill="%23334155"/>' +
+        '<text x="50" y="52" font-family="Arial" font-size="28" font-weight="900" fill="' + txtCol + '" text-anchor="middle">' + initials + '</text>' +
+        '</svg>';
 
     return 'data:image/svg+xml;utf8,' + svg;
 }
 
 // 國家卡包定義與特別球員介紹
-const COUNTRY_PACKS = [
+var COUNTRY_PACKS = [
     { 
         id: 'ALL', 
         name: '🌍 全球全明星包', 
@@ -304,16 +307,16 @@ const COUNTRY_PACKS = [
     }
 ];
 
-let selectedPack = 'ALL';
+var selectedPack = 'ALL';
 
-const POSITIONS = ["ST", "LW", "RW", "CAM", "CM", "LB", "LCB", "RCB", "RB", "GK"];
-const CLUBS = ["曼城 (英超)", "皇馬 (西甲)", "拜仁 (德甲)", "巴塞隆納 (西甲)", "阿森納 (英超)", "國米 (意甲)", "巴黎 (法甲)", "自由球員"];
-const NATIONS = ["🇳🇴 挪威", "🇫🇷 法國", "🇧🇪 比利時", "🇧🇷 巴西", "🏴󠁧󠁢󠁥󠁮󠁧󠁿 英格蘭", "🇪🇬 埃及", "🇭🇷 克羅埃西亞", "🇰🇷 韓國", "🇪🇸 西班牙", "🇹🇼 台灣", "🇦🇷 阿根廷", "🇵🇹 葡萄牙"];
+var POSITIONS = ["ST", "LW", "RW", "CAM", "CM", "LB", "LCB", "RCB", "RB", "GK"];
+var CLUBS = ["曼城 (英超)", "皇馬 (西甲)", "拜仁 (德甲)", "巴塞隆納 (西甲)", "阿森納 (英超)", "國米 (意甲)", "巴黎 (法甲)", "自由球員"];
+var NATIONS = ["🇳🇴 挪威", "🇫🇷 法國", "🇧🇪 比利時", "🇧🇷 巴西", "🏴󠁧󠁢󠁥󠁮󠁧󠁿 英格蘭", "🇪🇬 埃及", "🇭🇷 克羅埃西亞", "🇰🇷 韓國", "🇪🇸 西班牙", "🇹🇼 台灣", "🇦🇷 阿根廷", "🇵🇹 葡萄牙"];
 
-const DATABASE = [];
+var DATABASE = [];
 
 // 著名球星（特別球員）
-const STARS = [
+var STARS = [
     { name: "Zhenhe Son", pos: "CAM", ovr: 99, rarity: "SSR", nation: "🇹🇼 台灣", club: "自由球員 (製作人特別卡)" },
     { name: "E. Haaland", pos: "ST", ovr: 92, rarity: "SSR", nation: "🇳🇴 挪威", club: "曼城 (英超)" },
     { name: "K. Mbappé", pos: "ST", ovr: 92, rarity: "SSR", nation: "🇫🇷 法國", club: "皇馬 (西甲)" },
@@ -323,69 +326,69 @@ const STARS = [
     { name: "Vinícius Jr.", pos: "LW", ovr: 90, rarity: "SSR", nation: "🇧🇷 巴西", club: "皇馬 (西甲)" }
 ];
 
-STARS.forEach((s, idx) => { 
-    DATABASE.push({ id: `p_${idx+1}`, ...s, img: generateAvatarSVG(s.name, true) }); 
+STARS.forEach(function(s, idx) { 
+    DATABASE.push({ id: 'p_' + (idx + 1), name: s.name, pos: s.pos, ovr: s.ovr, rarity: s.rarity, nation: s.nation, club: s.club, img: generateAvatarSVG(s.name, true) }); 
 });
 
 // 擴充生成 300 位球員
-const FIRST_NAMES = ["Alex", "Carlos", "David", "Lucas", "Marco", "Julian", "Gabriel", "Sandro", "Mateo", "Hugo"];
-const LAST_NAMES = ["Silva", "Garcia", "Müller", "Fernandez", "Kim", "Santos", "Rossi", "Smith", "López", "Johnson"];
+var FIRST_NAMES = ["Alex", "Carlos", "David", "Lucas", "Marco", "Julian", "Gabriel", "Sandro", "Mateo", "Hugo"];
+var LAST_NAMES = ["Silva", "Garcia", "Müller", "Fernandez", "Kim", "Santos", "Rossi", "Smith", "López", "Johnson"];
 
-for (let i = DATABASE.length + 1; i <= 300; i++) {
-    let rand = Math.random() * 100;
-    let rarity = rand < 5 ? "SSR" : (rand < 30 ? "SR" : "R");
-    let baseOvr = rarity === "SSR" ? 88 + Math.floor(Math.random()*4) : (rarity === "SR" ? 83 + Math.floor(Math.random()*5) : 70 + Math.floor(Math.random()*12));
-    let fname = FIRST_NAMES[Math.floor(Math.random() * FIRST_NAMES.length)];
-    let lname = LAST_NAMES[Math.floor(Math.random() * LAST_NAMES.length)];
-    let fullname = `${fname} ${lname}`;
+for (var i = DATABASE.length + 1; i <= 300; i++) {
+    var rand = Math.random() * 100;
+    var rarity = rand < 5 ? "SSR" : (rand < 30 ? "SR" : "R");
+    var baseOvr = rarity === "SSR" ? 88 + Math.floor(Math.random()*4) : (rarity === "SR" ? 83 + Math.floor(Math.random()*5) : 70 + Math.floor(Math.random()*12));
+    var fname = FIRST_NAMES[Math.floor(Math.random() * FIRST_NAMES.length)];
+    var lname = LAST_NAMES[Math.floor(Math.random() * LAST_NAMES.length)];
+    var fullname = fname + ' ' + lname;
 
     DATABASE.push({
-        id: `p_${i}`,
+        id: 'p_' + i,
         name: fullname,
         pos: POSITIONS[Math.floor(Math.random() * POSITIONS.length)],
         ovr: baseOvr,
         rarity: rarity,
         nation: NATIONS[Math.floor(Math.random() * NATIONS.length)],
         club: CLUBS[Math.floor(Math.random() * CLUBS.length)],
-        img: generateAvatarSVG(fullname)
+        img: generateAvatarSVG(fullname, false)
     });
 }
 
 // 50 關獨特球隊資料庫
-const PVE_TEAMS = [];
-const TEAMS_NAME = ["業餘青訓隊", "橫濱海航", "倫敦藍獅", "馬德里紅白", "米蘭紅黑", "多特黃蜂", "阿姆斯特丹賈府", "巴黎金鵬", "慕尼黑巨人", "曼徹斯特藍月"];
-const STYLES = ["極致高壓壓迫逼搶", "防守反擊地下鐵路", "傳控足球蒂基塔卡", "邊路大錘高空轟炸", "全攻全守大師派系"];
+var PVE_TEAMS = [];
+var TEAMS_NAME = ["業餘青訓隊", "橫濱海航", "倫敦藍獅", "馬德里紅白", "米蘭紅黑", "多特黃蜂", "阿姆斯特丹賈府", "巴黎金鵬", "慕尼黑巨人", "曼徹斯特藍月"];
+var STYLES = ["極致高壓壓迫逼搶", "防守反擊地下鐵路", "傳控足球蒂基塔卡", "邊路大錘高空轟炸", "全攻全守大師派系"];
 
-for (let i = 1; i <= 50; i++) {
-    let tName = i <= 10 ? `第 ${i} 關：${TEAMS_NAME[i-1]}` : (i === 50 ? "第 50 關：宇宙傳奇明星隊" : `第 ${i} 關：${TEAMS_NAME[i%10]} ${Math.floor(i/10)+1}期`);
+for (var k = 1; k <= 50; k++) {
+    var tName = k <= 10 ? '第 ' + k + ' 關：' + TEAMS_NAME[k-1] : (k === 50 ? "第 50 關：宇宙傳奇明星隊" : '第 ' + k + ' 關：' + TEAMS_NAME[k%10] + ' ' + (Math.floor(k/10)+1) + '期');
     PVE_TEAMS.push({
-        id: i,
+        id: k,
         name: tName,
-        ovr: 65 + Math.floor(i * 0.9),
-        style: STYLES[i % STYLES.length],
-        starName: i === 50 ? "製作人 孫振賀 / 梅西" : `隊長 ${FIRST_NAMES[i%10]} (No.${i})`,
-        starDesc: `該隊核心靈魂，擅長 ${STYLES[i%STYLES.length]} 體系下發揮超強個人作戰能力。`
+        ovr: 65 + Math.floor(k * 0.9),
+        style: STYLES[k % STYLES.length],
+        starName: k === 50 ? "製作人 孫振賀 / 梅西" : '隊長 ' + FIRST_NAMES[k%10] + ' (No.' + k + ')',
+        starDesc: '該隊核心靈魂，擅長 ' + STYLES[k%STYLES.length] + ' 體系下發揮超強個人作戰能力。'
     });
 }
 
 // 遊戲狀態
-let currentUser = null;
-let playerData = {
+var currentUser = null;
+var playerData = {
     coins: 1500,
     cards: ["p_1", "p_2", "p_3", "p_4", "p_5", "p_6", "p_7"],
     squad: { LW: null, ST: null, RW: null, LCM: null, CAM: null, RCM: null, LB: null, LCB: null, RCB: null, RB: null, GK: null },
     clearedStages: 0
 };
 
-let currentSelectingSlot = null;
-let selectedStageNum = 1;
+var currentSelectingSlot = null;
+var selectedStageNum = 1;
 
 function handleLogin() {
-    let u = document.getElementById('auth-user').value.trim();
+    var u = document.getElementById('auth-user').value.trim();
     if (!u) return alert("請輸入帳號");
     currentUser = u;
 
-    let local = localStorage.getItem('ftcg3_user_' + u);
+    var local = localStorage.getItem('ftcg3_user_' + u);
     if (local) {
         playerData = JSON.parse(local);
     } else {
@@ -421,63 +424,62 @@ function updateUI() {
     renderAlbum();
 }
 
-function buildCardHTML(p, isLocked = false, onClickFn = '') {
-    return `
-        <div class="soccer-card ${p.rarity} ${isLocked ? 'locked' : ''}" onclick="${onClickFn}">
-            <span class="card-ovr">${p.ovr}<span class="card-pos">${p.pos}</span></span>
-            <span class="card-rarity ${p.rarity}">${p.rarity}</span>
-            <img class="card-img" src="${p.img}" alt="${p.name}">
-            <div class="card-name">${p.name}</div>
-            <div class="card-nation">${p.nation}</div>
-            <div class="card-club">${p.club}</div>
-        </div>
-    `;
+function buildCardHTML(p, isLocked, onClickFn) {
+    var lockedClass = isLocked ? ' locked' : '';
+    var clickAttr = onClickFn ? ' onclick="' + onClickFn + '"' : '';
+    
+    return '<div class="soccer-card ' + p.rarity + lockedClass + '"' + clickAttr + '>' +
+        '<span class="card-ovr">' + p.ovr + '<span class="card-pos">' + p.pos + '</span></span>' +
+        '<span class="card-rarity ' + p.rarity + '">' + p.rarity + '</span>' +
+        '<img class="card-img" src="' + p.img + '" alt="' + p.name + '">' +
+        '<div class="card-name">' + p.name + '</div>' +
+        '<div class="card-nation">' + p.nation + '</div>' +
+        '<div class="card-club">' + p.club + '</div>' +
+        '</div>';
 }
 
 // 排陣系統
 function renderPitch() {
-    let totalOvr = 0;
-    let count = 0;
+    var totalOvr = 0;
+    var count = 0;
 
-    Object.keys(playerData.squad).forEach(slotKey => {
-        let slotEl = document.getElementById(`slot-${slotKey}`);
-        let cardId = playerData.squad[slotKey];
+    Object.keys(playerData.squad).forEach(function(slotKey) {
+        var slotEl = document.getElementById('slot-' + slotKey);
+        var cardId = playerData.squad[slotKey];
         
         if (cardId) {
-            let p = DATABASE.find(x => x.id === cardId);
+            var p = DATABASE.find(function(x) { return x.id === cardId; });
             if (p) {
                 totalOvr += p.ovr;
                 count++;
-                slotEl.innerHTML = `
-                    <span class="slot-title">${slotKey}</span>
-                    <img src="${p.img}" style="width:48px; height:48px; border-radius:50%; margin-top:15px; border:1px solid #fff;">
-                    <div style="font-size:11px; font-weight:bold; color:#fff; margin-top:2px;">${p.name}</div>
-                    <div style="font-size:11px; color:var(--accent-gold); font-weight:900;">${p.ovr}</div>
-                `;
+                slotEl.innerHTML = '<span class="slot-title">' + slotKey + '</span>' +
+                    '<img class="pitch-player-avatar" src="' + p.img + '" alt="' + p.name + '">' +
+                    '<div class="pitch-player-name">' + p.name + '</div>' +
+                    '<div class="pitch-player-ovr">' + p.ovr + '</div>';
                 return;
             }
         }
-        slotEl.innerHTML = `<span class="slot-title">${slotKey}</span><span style="font-size:24px; color:rgba(255,255,255,0.4); margin-top:20px;">+</span>`;
+        slotEl.innerHTML = '<span class="slot-title">' + slotKey + '</span><span style="font-size:24px; color:rgba(255,255,255,0.4); margin-top:20px;">+</span>';
     });
 
-    let avgOvr = count > 0 ? Math.floor(totalOvr / count) : 0;
+    var avgOvr = count > 0 ? Math.floor(totalOvr / count) : 0;
     document.getElementById('team-ovr').textContent = avgOvr;
 }
 
 function openInlinePicker(slotKey) {
     currentSelectingSlot = slotKey;
-    document.querySelectorAll('.pitch-slot').forEach(s => s.classList.remove('active-slot'));
-    document.getElementById(`slot-${slotKey}`).classList.add('active-slot');
+    document.querySelectorAll('.pitch-slot').forEach(function(s) { s.classList.remove('active-slot'); });
+    document.getElementById('slot-' + slotKey).classList.add('active-slot');
 
-    document.getElementById('picker-title').textContent = `替換 ${slotKey} 位置先發球員`;
-    let grid = document.getElementById('picker-grid');
+    document.getElementById('picker-title').textContent = '替換 ' + slotKey + ' 位置先發球員';
+    var grid = document.getElementById('picker-grid');
     grid.innerHTML = '';
 
-    let owned = DATABASE.filter(p => playerData.cards.includes(p.id));
-    owned.sort((a,b) => b.ovr - a.ovr);
+    var owned = DATABASE.filter(function(p) { return playerData.cards.includes(p.id); });
+    owned.sort(function(a, b) { return b.ovr - a.ovr; });
 
-    owned.forEach(p => {
-        grid.innerHTML += buildCardHTML(p, false, `selectPlayerForSlot('${p.id}')`);
+    owned.forEach(function(p) {
+        grid.innerHTML += buildCardHTML(p, false, "selectPlayerForSlot('" + p.id + "')");
     });
 
     document.getElementById('inline-picker').classList.add('active');
@@ -493,15 +495,15 @@ function selectPlayerForSlot(cardId) {
 
 function closeInlinePicker() {
     document.getElementById('inline-picker').classList.remove('active');
-    document.querySelectorAll('.pitch-slot').forEach(s => s.classList.remove('active-slot'));
+    document.querySelectorAll('.pitch-slot').forEach(function(s) { s.classList.remove('active-slot'); });
 }
 
 function autoOptimizeSquad() {
-    let owned = DATABASE.filter(p => playerData.cards.includes(p.id));
-    owned.sort((a,b) => b.ovr - a.ovr);
+    var owned = DATABASE.filter(function(p) { return playerData.cards.includes(p.id); });
+    owned.sort(function(a, b) { return b.ovr - a.ovr; });
 
-    let slots = Object.keys(playerData.squad);
-    slots.forEach((slot, idx) => {
+    var slots = Object.keys(playerData.squad);
+    slots.forEach(function(slot, idx) {
         if (owned[idx]) {
             playerData.squad[slot] = owned[idx].id;
         }
@@ -512,28 +514,26 @@ function autoOptimizeSquad() {
 
 // 50 關 PVE 與對戰詳情
 function renderStages() {
-    let grid = document.getElementById('stage-grid');
+    var grid = document.getElementById('stage-grid');
     grid.innerHTML = '';
 
-    PVE_TEAMS.forEach(st => {
-        let isCleared = st.id <= playerData.clearedStages;
-        let isSelected = st.id === selectedStageNum;
-        grid.innerHTML += `
-            <div class="stage-card ${isCleared ? 'cleared' : ''} ${isSelected ? 'selected' : ''}" onclick="selectStage(${st.id})">
-                <div style="font-size:11px; color:var(--text-sub);">第 ${st.id} 關</div>
-                <div style="font-weight:bold; color:var(--accent-gold); font-size:12px;">OVR ${st.ovr}</div>
-                <div style="font-size:10px; margin-top:2px;">${isCleared ? '✅ 已通關' : '⚔️ 挑戰'}</div>
-            </div>
-        `;
+    PVE_TEAMS.forEach(function(st) {
+        var isCleared = st.id <= playerData.clearedStages;
+        var isSelected = st.id === selectedStageNum;
+        grid.innerHTML += '<div class="stage-card ' + (isCleared ? 'cleared' : '') + ' ' + (isSelected ? 'selected' : '') + '" onclick="selectStage(' + st.id + ')">' +
+            '<div style="font-size:11px; color:var(--text-sub);">第 ' + st.id + ' 關</div>' +
+            '<div style="font-weight:bold; color:var(--accent-gold); font-size:12px;">OVR ' + st.ovr + '</div>' +
+            '<div style="font-size:10px; margin-top:2px;">' + (isCleared ? '✅ 已通關' : '⚔️ 挑戰') + '</div>' +
+            '</div>';
     });
 }
 
 function selectStage(num) {
     selectedStageNum = num;
-    let st = PVE_TEAMS.find(x => x.id === num);
+    var st = PVE_TEAMS.find(function(x) { return x.id === num; });
     
     document.getElementById('enemy-team-name').textContent = st.name;
-    document.getElementById('enemy-team-ovr').textContent = `戰力 OVR ${st.ovr}`;
+    document.getElementById('enemy-team-ovr').textContent = '戰力 OVR ' + st.ovr;
     document.getElementById('enemy-style').textContent = st.style;
     document.getElementById('enemy-star-name').textContent = st.starName;
     document.getElementById('enemy-star-desc').textContent = st.starDesc;
@@ -543,55 +543,56 @@ function selectStage(num) {
 }
 
 function startPVEMatch() {
-    let myOvr = parseInt(document.getElementById('team-ovr').textContent);
+    var myOvr = parseInt(document.getElementById('team-ovr').textContent);
     if (myOvr === 0) return alert("請先排滿 11 人先發陣容！");
 
-    let st = PVE_TEAMS.find(x => x.id === selectedStageNum);
-    let enemyOvr = st.ovr;
+    var st = PVE_TEAMS.find(function(x) { return x.id === selectedStageNum; });
+    var enemyOvr = st.ovr;
 
-    let diff = myOvr - enemyOvr;
-    let myGoals = Math.max(0, Math.floor(Math.random() * 3 + (diff > 0 ? 1 : 0) + (diff > 10 ? 2 : 0)));
-    let enemyGoals = Math.max(0, Math.floor(Math.random() * 3 + (diff < 0 ? 1 : 0)));
+    var diff = myOvr - enemyOvr;
+    var myGoals = Math.max(0, Math.floor(Math.random() * 3 + (diff > 0 ? 1 : 0) + (diff > 10 ? 2 : 0)));
+    var enemyGoals = Math.max(0, Math.floor(Math.random() * 3 + (diff < 0 ? 1 : 0)));
 
-    let isWin = myGoals > enemyGoals || (myGoals === enemyGoals && myOvr >= enemyOvr);
+    var isWin = myGoals > enemyGoals || (myGoals === enemyGoals && myOvr >= enemyOvr);
     if (myGoals === enemyGoals) { myGoals += isWin ? 1 : 0; }
 
-    let reward = isWin ? (selectedStageNum * 60 + 300) : 100;
+    var reward = isWin ? (selectedStageNum * 60 + 300) : 100;
     playerData.coins += reward;
 
     if (isWin && selectedStageNum > playerData.clearedStages) {
         playerData.clearedStages = selectedStageNum;
     }
 
-    let possession = Math.min(75, Math.max(30, 50 + diff * 2));
-    let myShots = Math.floor(myGoals * 3 + Math.random() * 4);
-    let enemyShots = Math.floor(enemyGoals * 3 + Math.random() * 4);
+    var possession = Math.min(75, Math.max(30, 50 + diff * 2));
+    var myShots = Math.floor(myGoals * 3 + Math.random() * 4);
+    var enemyShots = Math.floor(enemyGoals * 3 + Math.random() * 4);
 
-    document.getElementById('match-score-display').innerHTML = `
-        <span style="color:var(--accent-cyan);">我方陣容 ${myGoals}</span> - <span style="color:var(--accent-rose);">${enemyGoals} ${st.name}</span>
-    `;
+    document.getElementById('match-score-display').innerHTML = '<span style="color:var(--accent-cyan);">我方陣容 ' + myGoals + '</span> - <span style="color:var(--accent-rose);">' + enemyGoals + ' ' + st.name + '</span>';
 
-    document.getElementById('stat-possession').textContent = `${possession}% vs ${100 - possession}%`;
-    document.getElementById('stat-shots').textContent = `${myShots}(${myGoals + 2}) vs ${enemyShots}(${enemyGoals + 1})`;
-    document.getElementById('stat-pass').textContent = `${82 + Math.floor(Math.random()*10)}% vs ${75 + Math.floor(Math.random()*10)}%`;
+    document.getElementById('stat-possession').textContent = possession + '% vs ' + (100 - possession) + '%';
+    document.getElementById('stat-shots').textContent = myShots + '(' + (myGoals + 2) + ') vs ' + enemyShots + '(' + (enemyGoals + 1) + ')';
+    document.getElementById('stat-pass').textContent = (82 + Math.floor(Math.random()*10)) + '% vs ' + (75 + Math.floor(Math.random()*10)) + '%';
 
-    let ownedSquad = Object.values(playerData.squad).map(id => DATABASE.find(x => x.id === id)).filter(x => x);
-    let goalTimelineHTML = '';
+    var ownedSquad = Object.values(playerData.squad).map(function(id) {
+        return DATABASE.find(function(x) { return x.id === id; });
+    }).filter(function(x) { return x; });
 
-    for (let g = 0; g < myGoals; g++) {
-        let scorer = ownedSquad.length > 0 ? ownedSquad[Math.floor(Math.random()*ownedSquad.length)].name : "前鋒球員";
-        let min = Math.floor(Math.random() * 85 + 1);
-        goalTimelineHTML += `<li><b style="color:var(--accent-cyan);">${min}' 進球！</b> 我方 [${scorer}] 破門得分</li>`;
+    var goalTimelineHTML = '';
+
+    for (var g = 0; g < myGoals; g++) {
+        var scorer = ownedSquad.length > 0 ? ownedSquad[Math.floor(Math.random()*ownedSquad.length)].name : "前鋒球員";
+        var min1 = Math.floor(Math.random() * 85 + 1);
+        goalTimelineHTML += '<li><b style="color:var(--accent-cyan);">' + min1 + '\' 進球！</b> 我方 [' + scorer + '] 破門得分</li>';
     }
-    for (let eg = 0; eg < enemyGoals; eg++) {
-        let min = Math.floor(Math.random() * 85 + 1);
-        goalTimelineHTML += `<li><b style="color:var(--accent-rose);">${min}' 對手進球！</b> ${st.starName} 攻門得分</li>`;
+    for (var eg = 0; eg < enemyGoals; eg++) {
+        var min2 = Math.floor(Math.random() * 85 + 1);
+        goalTimelineHTML += '<li><b style="color:var(--accent-rose);">' + min2 + '\' 對手進球！</b> ' + st.starName + ' 攻門得分</li>';
     }
 
     document.getElementById('goal-timeline').innerHTML = goalTimelineHTML || "<li>全場防守嚴密，無突破進球</li>";
     document.getElementById('stat-mvp').textContent = isWin ? (ownedSquad[0] ? ownedSquad[0].name : "Zhenhe Son (孫振賀)") : st.starName;
 
-    document.getElementById('match-reward-text').textContent = isWin ? `🎉 比賽勝利！獲得獎勵 $${reward}` : `❌ 比賽敗北！獲得鼓勵金 $${reward}`;
+    document.getElementById('match-reward-text').textContent = isWin ? '🎉 比賽勝利！獲得獎勵 $' + reward : '❌ 比賽敗北！獲得鼓勵金 $' + reward;
     document.getElementById('match-report').style.display = 'block';
 
     saveData();
@@ -600,16 +601,14 @@ function startPVEMatch() {
 
 // 國家卡包選擇與特別球員介紹
 function renderPackSelector() {
-    let grid = document.getElementById('pack-selector');
+    var grid = document.getElementById('pack-selector');
     grid.innerHTML = '';
-    COUNTRY_PACKS.forEach(pk => {
-        let isSel = pk.id === selectedPack;
-        grid.innerHTML += `
-            <div class="pack-card ${isSel ? 'selected' : ''}" onclick="selectPack('${pk.id}')">
-                <div style="font-size:24px;">${pk.flag}</div>
-                <div style="font-weight:bold; color:#fff; margin-top:5px; font-size:13px;">${pk.name}</div>
-            </div>
-        `;
+    COUNTRY_PACKS.forEach(function(pk) {
+        var isSel = pk.id === selectedPack;
+        grid.innerHTML += '<div class="pack-card ' + (isSel ? 'selected' : '') + '" onclick="selectPack(\'' + pk.id + '\')">' +
+            '<div style="font-size:24px;">' + pk.flag + '</div>' +
+            '<div style="font-weight:bold; color:#fff; margin-top:5px; font-size:13px;">' + pk.name + '</div>' +
+            '</div>';
     });
 
     updatePackInfo();
@@ -621,41 +620,39 @@ function selectPack(packId) {
 }
 
 function updatePackInfo() {
-    let packInfo = COUNTRY_PACKS.find(x => x.id === selectedPack);
-    let infoBox = document.getElementById('pack-info');
-    infoBox.innerHTML = `
-        <h4 style="color:var(--accent-gold); font-size:14px; margin-bottom:5px;">📌 ${packInfo.name} - 特別卡包情報</h4>
-        <p style="font-size:13px; color:var(--text-main); line-height:1.5;">${packInfo.specialPlayers}</p>
-    `;
+    var packInfo = COUNTRY_PACKS.find(function(x) { return x.id === selectedPack; });
+    var infoBox = document.getElementById('pack-info');
+    infoBox.innerHTML = '<h4 style="color:var(--accent-gold); font-size:14px; margin-bottom:5px;">📌 ' + packInfo.name + ' - 特別卡包情報</h4>' +
+        '<p style="font-size:13px; color:var(--text-main); line-height:1.5;">' + packInfo.specialPlayers + '</p>';
 }
 
 function drawGacha(count) {
-    let cost = count === 1 ? 200 : 1800;
+    var cost = count === 1 ? 200 : 1800;
     if (playerData.coins < cost) return alert("金幣不足！請多打 PVE 關卡賺取獎金！");
 
     playerData.coins -= cost;
-    let resContainer = document.getElementById('gacha-result');
+    var resContainer = document.getElementById('gacha-result');
     resContainer.innerHTML = '';
 
-    let packInfo = COUNTRY_PACKS.find(x => x.id === selectedPack);
+    var packInfo = COUNTRY_PACKS.find(function(x) { return x.id === selectedPack; });
 
-    for (let i = 0; i < count; i++) {
-        let rand = Math.random() * 100;
-        let pool = [];
+    for (var i = 0; i < count; i++) {
+        var rand = Math.random() * 100;
+        var pool = [];
 
-        let basePool = DATABASE;
+        var basePool = DATABASE;
         if (packInfo.nationFilter !== 'ALL') {
-            basePool = DATABASE.filter(x => packInfo.nationFilter.includes(x.nation));
+            basePool = DATABASE.filter(function(x) { return packInfo.nationFilter.includes(x.nation); });
             if (basePool.length === 0) basePool = DATABASE;
         }
 
-        if (rand < 5) pool = basePool.filter(x => x.rarity === "SSR");
-        else if (rand < 30) pool = basePool.filter(x => x.rarity === "SR");
-        else pool = basePool.filter(x => x.rarity === "R");
+        if (rand < 5) pool = basePool.filter(function(x) { return x.rarity === "SSR"; });
+        else if (rand < 30) pool = basePool.filter(function(x) { return x.rarity === "SR"; });
+        else pool = basePool.filter(function(x) { return x.rarity === "R"; });
 
         if (pool.length === 0) pool = basePool;
 
-        let picked = pool[Math.floor(Math.random() * pool.length)];
+        var picked = pool[Math.floor(Math.random() * pool.length)];
 
         if (!playerData.cards.includes(picked.id)) {
             playerData.cards.push(picked.id);
@@ -663,7 +660,7 @@ function drawGacha(count) {
             playerData.coins += 60;
         }
 
-        resContainer.innerHTML += buildCardHTML(picked);
+        resContainer.innerHTML += buildCardHTML(picked, false, '');
     }
 
     saveData();
@@ -672,17 +669,17 @@ function drawGacha(count) {
 
 // 圖鑑展示
 function renderAlbum() {
-    let grid = document.getElementById('album-grid');
+    var grid = document.getElementById('album-grid');
     grid.innerHTML = '';
-    DATABASE.forEach(p => {
-        let isOwned = playerData.cards.includes(p.id);
-        grid.innerHTML += buildCardHTML(p, !isOwned);
+    DATABASE.forEach(function(p) {
+        var isOwned = playerData.cards.includes(p.id);
+        grid.innerHTML += buildCardHTML(p, !isOwned, '');
     });
 }
 
 function switchTab(evt, tabId) {
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+    document.querySelectorAll('.tab-content').forEach(function(c) { c.classList.remove('active'); });
     evt.currentTarget.classList.add('active');
     document.getElementById(tabId).classList.add('active');
 }
