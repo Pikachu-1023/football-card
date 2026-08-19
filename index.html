@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="google" content="notranslate">
-    <title>⚽ 足球卡牌大師 2.0 | 11人制陣容與50關闖關</title>
+    <title>⚽ 足球卡牌大師 2.0 | 50隊闖關與對戰詳情</title>
     <style>
         :root {
             --bg-color: #0b0f19;
@@ -30,7 +30,7 @@
         .auth-container { max-width: 400px; margin: 60px auto; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 30px; text-align: center; }
         .auth-input { width: 100%; padding: 12px; margin: 8px 0; background: #0b0f19; border: 1px solid var(--card-border); color: #fff; border-radius: 8px; }
 
-        /* 主介面 Header & Tab */
+        /* Header & Tab */
         .header-card { text-align: center; background: linear-gradient(135deg, #1e293b, #0f172a); border: 1px solid var(--card-border); border-radius: 16px; padding: 18px; position: relative; }
         .tab-bar { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 5px; }
         .tab-btn { background-color: var(--card-bg); color: var(--text-sub); border: 1px solid var(--card-border); padding: 12px 18px; border-radius: 10px; font-weight: bold; cursor: pointer; white-space: nowrap; }
@@ -39,7 +39,7 @@
         .tab-content.active { display: block; }
 
         /* 🎴 卡牌樣式 */
-        .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-top: 15px; }
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; margin-top: 15px; }
         .soccer-card {
             width: 100%; height: 230px; border-radius: 12px; position: relative; background: #1e293b;
             border: 2px solid #334155; padding: 8px; display: flex; flex-direction: column; align-items: center;
@@ -58,7 +58,7 @@
 
         .card-ovr { position: absolute; top: 6px; left: 8px; font-size: 16px; font-weight: 900; color: #fff; }
         .card-pos { font-size: 10px; color: var(--text-sub); display: block; }
-        .card-img { width: 75px; height: 75px; border-radius: 50%; margin-top: 22px; border: 2px solid var(--card-border); background: #0f172a; }
+        .card-img { width: 75px; height: 75px; border-radius: 50%; object-fit: cover; margin-top: 22px; border: 2px solid var(--card-border); background: #000; }
         .card-name { font-size: 13px; font-weight: bold; margin-top: 6px; text-align: center; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
         .card-nation { font-size: 10px; color: var(--accent-cyan); margin-top: 2px; }
         .card-club { font-size: 10px; color: var(--text-sub); text-align: center; margin-top: 1px; }
@@ -71,30 +71,29 @@
         }
         .pitch-row { display: flex; justify-content: space-around; align-items: center; }
         .pitch-slot {
-            width: 100px; height: 130px; background: rgba(0,0,0,0.4); border: 2px dashed rgba(255,255,255,0.5);
+            width: 95px; height: 125px; background: rgba(0,0,0,0.4); border: 2px dashed rgba(255,255,255,0.5);
             border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center;
             cursor: pointer; position: relative; transition: all 0.2s;
         }
-        .pitch-slot:hover { border-color: var(--accent-gold); background: rgba(0,0,0,0.6); }
+        .pitch-slot:hover, .pitch-slot.active-slot { border-color: var(--accent-gold); background: rgba(0,0,0,0.7); transform: scale(1.05); }
         .slot-title { position: absolute; top: 4px; font-size: 10px; color: var(--accent-gold); font-weight: bold; }
 
-        /* 🎮 50 關 PVE 關卡列表 */
-        .stage-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; margin-top: 15px; max-height: 400px; overflow-y: auto; padding-right: 5px; }
-        .stage-card {
-            background: #1e293b; border: 1px solid var(--card-border); border-radius: 8px; padding: 10px;
-            text-align: center; cursor: pointer; transition: 0.2s;
-        }
-        .stage-card:hover { border-color: var(--accent-cyan); background: #334155; }
+        /* 內嵌選擇替換區 (無彈窗) */
+        .inline-panel { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 15px; margin-top: 15px; display: none; }
+        .inline-panel.active { display: block; }
+
+        /* 🎮 50 關 PVE 關卡列表與對戰介面 */
+        .stage-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; margin-top: 15px; max-height: 250px; overflow-y: auto; padding-right: 5px; }
+        .stage-card { background: #1e293b; border: 1px solid var(--card-border); border-radius: 8px; padding: 8px; text-align: center; cursor: pointer; transition: 0.2s; }
+        .stage-card:hover, .stage-card.selected { border-color: var(--accent-cyan); background: #334155; }
         .stage-card.cleared { border-color: var(--accent-green); background: #064e3b; }
 
-        /* 按鈕樣式 */
+        .match-preview-box { background: #1e293b; border: 1px solid var(--card-border); border-radius: 12px; padding: 15px; margin-top: 15px; display: flex; flex-direction: column; gap: 10px; }
+        .match-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; font-size: 13px; background: #0b0f19; padding: 12px; border-radius: 8px; }
+
         .action-btn { background: #1e293b; color: #fff; border: 1px solid var(--card-border); padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; }
         .btn-gold { background: linear-gradient(135deg, #eab308, #ca8a04); color: #000; }
         .btn-purple { background: linear-gradient(135deg, #a855f7, #7e22ce); color: #fff; }
-
-        /* Modal 選擇彈窗 */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 999; justify-content: center; align-items: center; }
-        .modal-content { background: var(--card-bg); width: 90%; max-width: 600px; border-radius: 16px; padding: 20px; max-height: 80vh; overflow-y: auto; border: 1px solid var(--card-border); }
     </style>
 </head>
 <body class="notranslate">
@@ -105,7 +104,7 @@
     <div id="view-auth" class="page-view active">
         <div class="auth-container">
             <h2 style="color:var(--accent-cyan);">⚽ 足球卡牌大師 2.0</h2>
-            <p style="color:var(--text-sub); font-size:13px; margin-bottom:15px;">300+球員庫 × 11人制排陣 × 50關闖關</p>
+            <p style="color:var(--text-sub); font-size:13px; margin-bottom:15px;">300+球員照片 × 嵌入式排陣 × 50球隊對戰詳情</p>
             <input type="text" id="auth-user" class="auth-input" placeholder="輸入玩家帳號">
             <button class="action-btn btn-gold" style="width:100%; margin-top:10px;" onclick="handleLogin()">進入球場</button>
         </div>
@@ -123,52 +122,98 @@
 
         <div class="tab-bar">
             <button class="tab-btn active" onclick="switchTab(event, 'tab-squad')">👕 11人制排陣</button>
-            <button class="tab-btn" onclick="switchTab(event, 'tab-pve')">⚔️ 50關電腦闖關</button>
+            <button class="tab-btn" onclick="switchTab(event, 'tab-pve')">⚔️ 50關聯賽對戰</button>
             <button class="tab-btn" onclick="switchTab(event, 'tab-gacha')">🎰 球星抽卡</button>
             <button class="tab-btn" onclick="switchTab(event, 'tab-album')">📖 卡牌圖鑑 (<span id="album-count">0</span>/300)</button>
         </div>
 
-        <!-- 1. 11 人制陣容 (4-3-3 戰術) -->
+        <!-- 1. 11 人制陣容 (4-3-3 戰術 - 嵌入式選擇無彈窗) -->
         <div id="tab-squad" class="tab-content active">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <h3>👕 最佳 11 人首發陣容 (4-3-3 陣型)</h3>
                 <button class="action-btn btn-gold" onclick="autoOptimizeSquad()">✨ 自動最佳化首發</button>
             </div>
-            <p style="color:var(--text-sub); font-size:12px; margin-top:4px;">點擊場上的位置格子，即可從你擁有的球員庫中安排先發！</p>
+            <p style="color:var(--text-sub); font-size:12px; margin-top:4px;">點擊場上位置，下方將直接展開你的球員庫進行替換！</p>
             
             <div class="pitch-container">
-                <!-- 前鋒 (Forward) -->
+                <!-- 前鋒 -->
                 <div class="pitch-row">
-                    <div class="pitch-slot" onclick="openPicker('LW')" id="slot-LW"><span class="slot-title">左翼 LW</span></div>
-                    <div class="pitch-slot" onclick="openPicker('ST')" id="slot-ST"><span class="slot-title">中鋒 ST</span></div>
-                    <div class="pitch-slot" onclick="openPicker('RW')" id="slot-RW"><span class="slot-title">右翼 RW</span></div>
+                    <div class="pitch-slot" onclick="openInlinePicker('LW')" id="slot-LW"><span class="slot-title">左翼 LW</span></div>
+                    <div class="pitch-slot" onclick="openInlinePicker('ST')" id="slot-ST"><span class="slot-title">中鋒 ST</span></div>
+                    <div class="pitch-slot" onclick="openInlinePicker('RW')" id="slot-RW"><span class="slot-title">右翼 RW</span></div>
                 </div>
-                <!-- 中場 (Midfield) -->
+                <!-- 中場 -->
                 <div class="pitch-row">
-                    <div class="pitch-slot" onclick="openPicker('LCM')" id="slot-LCM"><span class="slot-title">左中場 LCM</span></div>
-                    <div class="pitch-slot" onclick="openPicker('CAM')" id="slot-CAM"><span class="slot-title">進攻中場 CAM</span></div>
-                    <div class="pitch-slot" onclick="openPicker('RCM')" id="slot-RCM"><span class="slot-title">右中場 RCM</span></div>
+                    <div class="pitch-slot" onclick="openInlinePicker('LCM')" id="slot-LCM"><span class="slot-title">左中場 LCM</span></div>
+                    <div class="pitch-slot" onclick="openInlinePicker('CAM')" id="slot-CAM"><span class="slot-title">進攻中場 CAM</span></div>
+                    <div class="pitch-slot" onclick="openInlinePicker('RCM')" id="slot-RCM"><span class="slot-title">右中場 RCM</span></div>
                 </div>
-                <!-- 後衛 (Defender) -->
+                <!-- 後衛 -->
                 <div class="pitch-row">
-                    <div class="pitch-slot" onclick="openPicker('LB')" id="slot-LB"><span class="slot-title">左後衛 LB</span></div>
-                    <div class="pitch-slot" onclick="openPicker('LCB')" id="slot-LCB"><span class="slot-title">左中衛 LCB</span></div>
-                    <div class="pitch-slot" onclick="openPicker('RCB')" id="slot-RCB"><span class="slot-title">右中衛 RCB</span></div>
-                    <div class="pitch-slot" onclick="openPicker('RB')" id="slot-RB"><span class="slot-title">右後衛 RB</span></div>
+                    <div class="pitch-slot" onclick="openInlinePicker('LB')" id="slot-LB"><span class="slot-title">左後衛 LB</span></div>
+                    <div class="pitch-slot" onclick="openInlinePicker('LCB')" id="slot-LCB"><span class="slot-title">左中衛 LCB</span></div>
+                    <div class="pitch-slot" onclick="openInlinePicker('RCB')" id="slot-RCB"><span class="slot-title">右中衛 RCB</span></div>
+                    <div class="pitch-slot" onclick="openInlinePicker('RB')" id="slot-RB"><span class="slot-title">右後衛 RB</span></div>
                 </div>
-                <!-- 門將 (Goalkeeper) -->
+                <!-- 門將 -->
                 <div class="pitch-row">
-                    <div class="pitch-slot" onclick="openPicker('GK')" id="slot-GK"><span class="slot-title">守門員 GK</span></div>
+                    <div class="pitch-slot" onclick="openInlinePicker('GK')" id="slot-GK"><span class="slot-title">守門員 GK</span></div>
                 </div>
+            </div>
+
+            <!-- 下方嵌入式球員選擇面板 (非彈窗) -->
+            <div id="inline-picker" class="inline-panel">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <h4 id="picker-title" style="color:var(--accent-cyan);">選擇先發球員</h4>
+                    <button class="action-btn" style="padding:4px 10px; font-size:12px;" onclick="closeInlinePicker()">✕ 關閉替換</button>
+                </div>
+                <div id="picker-grid" class="card-grid"></div>
             </div>
         </div>
 
-        <!-- 2. 50 關 PVE 闖關模式 -->
+        <!-- 2. 50 關 PVE 模式 (不同球隊特色與詳細對戰報告) -->
         <div id="tab-pve" class="tab-content">
-            <h3>⚔️ 電腦聯賽闖關 (50 關)</h3>
-            <p style="color:var(--text-sub); font-size:13px;">挑戰越來越強的電腦球隊，贏取大量金幣抽卡！</p>
-            <div id="pve-log" style="background:#0b0f19; padding:12px; border-radius:8px; font-size:13px; margin-top:10px; color:var(--accent-cyan);">選擇關卡開始比賽...</div>
+            <h3>⚔️ 50 關電腦聯賽賽程</h3>
+            <p style="color:var(--text-sub); font-size:13px;">點擊關卡查看球隊情報與關鍵球員，發起對決！</p>
+
             <div id="stage-grid" class="stage-grid"></div>
+
+            <!-- 球隊情報與比賽進行區 -->
+            <div id="match-preview" class="match-preview-box">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <h3 id="enemy-team-name" style="color:var(--accent-gold);">關卡 1：業餘青訓預備隊</h3>
+                    <span id="enemy-team-ovr" style="background:var(--accent-rose); color:#fff; padding:4px 8px; border-radius:6px; font-weight:bold;">戰力 OVR 65</span>
+                </div>
+                <div style="font-size:13px; color:var(--text-sub);">
+                    <b>🛡️ 戰術風格：</b><span id="enemy-style">初生之犢不畏虎，以活力與防守反擊為主。</span>
+                </div>
+                <div style="font-size:13px; background:#0b0f19; padding:10px; border-radius:8px; border-left:3px solid var(--accent-cyan);">
+                    <b style="color:var(--accent-cyan);">🌟 核心球星：</b><span id="enemy-star-name">小將阿里</span><br>
+                    <span id="enemy-star-desc" style="font-size:12px; color:var(--text-sub);">青訓營最具潛力的18歲新星，具備極強突破爆發力。</span>
+                </div>
+
+                <button class="action-btn btn-gold" style="width:100%; font-size:16px; margin-top:5px;" onclick="startPVEMatch()">⚔️ 開始對決比賽</button>
+            </div>
+
+            <!-- 對戰詳情結果面板 -->
+            <div id="match-report" class="match-preview-box" style="display:none; border-color:var(--accent-cyan);">
+                <h3 style="color:var(--accent-cyan); text-align:center;">📊 比賽對戰詳情報告</h3>
+                <div id="match-score-display" style="text-align:center; font-size:28px; font-weight:900; margin:10px 0; color:#fff;">- vs -</div>
+                
+                <div class="match-stats-grid">
+                    <div><b>控球率：</b> <span id="stat-possession">-</span></div>
+                    <div><b>射門 (射正)：</b> <span id="stat-shots">-</span></div>
+                    <div><b>傳球成功率：</b> <span id="stat-pass">-</span></div>
+                    <div><b>比賽 MVP：</b> <span id="stat-mvp" style="color:var(--accent-gold); font-weight:bold;">-</span></div>
+                </div>
+
+                <div style="margin-top:10px;">
+                    <b>⚽ 精彩進球時間軸：</b>
+                    <ul id="goal-timeline" style="font-size:12px; color:var(--text-sub); margin-top:5px; padding-left:20px; display:flex; flex-direction:column; gap:4px;"></ul>
+                </div>
+
+                <div id="match-reward-text" style="text-align:center; font-weight:bold; color:var(--accent-gold); margin-top:10px;"></div>
+            </div>
         </div>
 
         <!-- 3. 抽卡系統 -->
@@ -194,22 +239,21 @@
 
 </div>
 
-<!-- 球員選擇彈窗 Modal -->
-<div id="picker-modal" class="modal">
-    <div class="modal-content">
-        <h3 id="picker-title" style="margin-bottom:10px;">選擇先發球員</h3>
-        <div id="picker-grid" class="card-grid"></div>
-        <button class="action-btn" style="width:100%; margin-top:15px;" onclick="closePicker()">關閉</button>
-    </div>
-</div>
-
 <script>
-// 生成 100% 穩定的動態 SVG 向量頭像 (解決跨域與防盜鏈破圖)
-function generateAvatarSVG(rarity, pos) {
-    let strokeColor = rarity === 'SSR' ? '%23fbbf24' : (rarity === 'SR' ? '%23a855f7' : '%2338bdf8');
-    let svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%230f172a'/><circle cx='50' cy='36' r='20' fill='${strokeColor}' opacity='0.85'/><path d='M 20 82 C 20 58, 80 58, 80 82 Z' fill='${strokeColor}' opacity='0.85'/><circle cx='50' cy='50' r='46' fill='none' stroke='${strokeColor}' stroke-width='3'/><text x='50%' y='92%' dominant-baseline='middle' text-anchor='middle' fill='%23ffffff' font-size='10' font-weight='bold' font-family='sans-serif'>${pos}</text></svg>`;
-    return `data:image/svg+xml;utf8,${svg}`;
-}
+// 1. 300位球員照片資料庫 (使用 Unsplash 穩定真實運動員圖片 + referrerpolicy="no-referrer")
+const PHOTO_POOL = [
+    "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=300&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1518091043644-c1d4457512c6?w=300&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=300&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?w=300&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1517927033932-b3d18e61fb3a?w=300&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1511886929837-354d827aae26?w=300&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1560272564-669520557220?w=300&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=300&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=300&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=300&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1575361204480-aadea25e6e68?w=300&auto=format&fit=crop"
+];
 
 const POSITIONS = ["ST", "LW", "RW", "CAM", "CM", "LB", "LCB", "RCB", "RB", "GK"];
 const CLUBS = ["曼城 (英超)", "皇馬 (西甲)", "拜仁 (德甲)", "巴塞隆納 (西甲)", "阿森納 (英超)", "國米 (意甲)", "巴黎 (法甲)", "自由球員"];
@@ -217,26 +261,20 @@ const NATIONS = ["🇳🇴 挪威", "🇫🇷 法國", "🇧🇪 比利時", "�
 
 const DATABASE = [];
 
-// 著名頭牌巨星
+// 著名球星
 const STARS = [
-    { name: "E. Haaland", pos: "ST", ovr: 92, rarity: "SSR", nation: "🇳🇴 挪威", club: "曼城 (英超)" },
-    { name: "K. Mbappé", pos: "ST", ovr: 92, rarity: "SSR", nation: "🇫🇷 法國", club: "皇馬 (西甲)" },
-    { name: "L. Messi", pos: "RW", ovr: 91, rarity: "SSR", nation: "🇦🇷 阿根廷", club: "自由球員" },
-    { name: "C. Ronaldo", pos: "ST", ovr: 90, rarity: "SSR", nation: "🇵🇹 葡萄牙", club: "自由球員" },
-    { name: "K. De Bruyne", pos: "CAM", ovr: 91, rarity: "SSR", nation: "🇧🇪 比利時", club: "曼城 (英超)" },
-    { name: "Vinícius Jr.", pos: "LW", ovr: 90, rarity: "SSR", nation: "🇧🇷 巴西", club: "皇馬 (西甲)" },
-    { name: "Zhenhe Son", pos: "CAM", ovr: 99, rarity: "SSR", nation: "🇹🇼 台灣", club: "自由球員" }
+    { name: "E. Haaland", pos: "ST", ovr: 92, rarity: "SSR", nation: "🇳🇴 挪威", club: "曼城 (英超)", img: PHOTO_POOL[0] },
+    { name: "K. Mbappé", pos: "ST", ovr: 92, rarity: "SSR", nation: "🇫🇷 法國", club: "皇馬 (西甲)", img: PHOTO_POOL[1] },
+    { name: "L. Messi", pos: "RW", ovr: 91, rarity: "SSR", nation: "🇦🇷 阿根廷", club: "自由球員", img: PHOTO_POOL[2] },
+    { name: "C. Ronaldo", pos: "ST", ovr: 90, rarity: "SSR", nation: "🇵🇹 葡萄牙", club: "自由球員", img: PHOTO_POOL[3] },
+    { name: "K. De Bruyne", pos: "CAM", ovr: 91, rarity: "SSR", nation: "🇧🇪 比利時", club: "曼城 (英超)", img: PHOTO_POOL[4] },
+    { name: "Vinícius Jr.", pos: "LW", ovr: 90, rarity: "SSR", nation: "🇧🇷 巴西", club: "皇馬 (西甲)", img: PHOTO_POOL[5] },
+    { name: "Zhenhe Son", pos: "CAM", ovr: 99, rarity: "SSR", nation: "🇹🇼 台灣", club: "自由球員", img: PHOTO_POOL[6] }
 ];
 
-STARS.forEach((s, idx) => {
-    DATABASE.push({
-        id: `p_${idx+1}`,
-        ...s,
-        img: generateAvatarSVG(s.rarity, s.pos)
-    });
-});
+STARS.forEach((s, idx) => { DATABASE.push({ id: `p_${idx+1}`, ...s }); });
 
-// 生成剩餘球員至 300 名
+// 擴充至 300 名球員
 const FIRST_NAMES = ["Alex", "Carlos", "David", "Lucas", "Marco", "Julian", "Gabriel", "Sandro", "Mateo", "Hugo"];
 const LAST_NAMES = ["Silva", "Garcia", "Müller", "Fernandez", "Kim", "Santos", "Rossi", "Smith", "López", "Johnson"];
 
@@ -246,30 +284,47 @@ for (let i = DATABASE.length + 1; i <= 300; i++) {
     let baseOvr = rarity === "SSR" ? 88 + Math.floor(Math.random()*4) : (rarity === "SR" ? 83 + Math.floor(Math.random()*5) : 70 + Math.floor(Math.random()*12));
     let fname = FIRST_NAMES[Math.floor(Math.random() * FIRST_NAMES.length)];
     let lname = LAST_NAMES[Math.floor(Math.random() * LAST_NAMES.length)];
-    let pos = POSITIONS[Math.floor(Math.random() * POSITIONS.length)];
 
     DATABASE.push({
         id: `p_${i}`,
         name: `${fname} ${lname}`,
-        pos: pos,
+        pos: POSITIONS[Math.floor(Math.random() * POSITIONS.length)],
         ovr: baseOvr,
         rarity: rarity,
         nation: NATIONS[Math.floor(Math.random() * NATIONS.length)],
         club: CLUBS[Math.floor(Math.random() * CLUBS.length)],
-        img: generateAvatarSVG(rarity, pos)
+        img: PHOTO_POOL[i % PHOTO_POOL.length]
     });
 }
 
-// 2. 遊戲狀態與存檔
+// 2. 50 關獨特球隊資料庫
+const PVE_TEAMS = [];
+const TEAMS_NAME = ["業餘青訓隊", "橫濱海航", "倫敦藍獅", "馬德里紅白", "米蘭紅黑", "多特黃蜂", "阿姆斯特丹賈府", "巴黎金鵬", "慕尼黑巨人", "曼徹斯特藍月"];
+const STYLES = ["極致高壓壓迫逼搶", "防守反擊地下鐵路", "傳控足球蒂基塔卡", "邊路大錘高空轟炸", "全攻全守大師派系"];
+
+for (let i = 1; i <= 50; i++) {
+    let tName = i <= 10 ? `第 ${i} 關：${TEAMS_NAME[i-1]}` : (i === 50 ? "第 50 關：宇宙傳奇明星隊" : `第 ${i} 關：${TEAMS_NAME[i%10]} ${Math.floor(i/10)+1}期`);
+    PVE_TEAMS.push({
+        id: i,
+        name: tName,
+        ovr: 65 + Math.floor(i * 0.9),
+        style: STYLES[i % STYLES.length],
+        starName: i === 50 ? "傳奇球聖 孫振鶴 / 梅西" : `隊長 ${FIRST_NAMES[i%10]} (No.${i})`,
+        starDesc: `該隊核心靈魂，擅長 ${STYLES[i%STYLES.length]} 體系下發揮超強個人作戰能力。`
+    });
+}
+
+// 3. 遊戲狀態
 let currentUser = null;
 let playerData = {
     coins: 1500,
-    cards: ["p_1", "p_2", "p_3", "p_4", "p_5", "p_6", "p_7"], // 初始預設擁有的球員
+    cards: ["p_1", "p_2", "p_3", "p_4", "p_5", "p_6", "p_7"],
     squad: { LW: null, ST: null, RW: null, LCM: null, CAM: null, RCM: null, LB: null, LCB: null, RCB: null, RB: null, GK: null },
     clearedStages: 0
 };
 
 let currentSelectingSlot = null;
+let selectedStageNum = 1;
 
 function handleLogin() {
     let u = document.getElementById('auth-user').value.trim();
@@ -288,6 +343,7 @@ function handleLogin() {
     document.getElementById('view-game').classList.add('active');
     document.getElementById('player-id').textContent = currentUser;
     updateUI();
+    selectStage(1);
 }
 
 function handleLogout() {
@@ -310,12 +366,13 @@ function updateUI() {
     renderAlbum();
 }
 
+// 建立帶有 referrerpolicy="no-referrer" 的卡牌 HTML (解決照片破圖)
 function buildCardHTML(p, isLocked = false, onClickFn = '') {
     return `
         <div class="soccer-card ${p.rarity} ${isLocked ? 'locked' : ''}" onclick="${onClickFn}">
             <span class="card-ovr">${p.ovr}<span class="card-pos">${p.pos}</span></span>
             <span class="card-rarity ${p.rarity}">${p.rarity}</span>
-            <img class="card-img" src="${p.img}" alt="${p.name}">
+            <img class="card-img" src="${p.img}" alt="${p.name}" referrerpolicy="no-referrer">
             <div class="card-name">${p.name}</div>
             <div class="card-nation">${p.nation}</div>
             <div class="card-club">${p.club}</div>
@@ -323,7 +380,7 @@ function buildCardHTML(p, isLocked = false, onClickFn = '') {
     `;
 }
 
-// 3. 排陣系統
+// 4. 排陣系統 (無彈窗)
 function renderPitch() {
     let totalOvr = 0;
     let count = 0;
@@ -339,9 +396,9 @@ function renderPitch() {
                 count++;
                 slotEl.innerHTML = `
                     <span class="slot-title">${slotKey}</span>
-                    <img src="${p.img}" style="width:50px; height:50px; border-radius:50%; margin-top:15px;">
-                    <div style="font-size:11px; font-weight:bold; color:#fff; margin-top:4px;">${p.name}</div>
-                    <div style="font-size:12px; color:var(--accent-gold); font-weight:900;">${p.ovr}</div>
+                    <img src="${p.img}" referrerpolicy="no-referrer" style="width:48px; height:48px; border-radius:50%; margin-top:15px; border:1px solid #fff; object-fit:cover;">
+                    <div style="font-size:11px; font-weight:bold; color:#fff; margin-top:2px;">${p.name}</div>
+                    <div style="font-size:11px; color:var(--accent-gold); font-weight:900;">${p.ovr}</div>
                 `;
                 return;
             }
@@ -353,9 +410,12 @@ function renderPitch() {
     document.getElementById('team-ovr').textContent = avgOvr;
 }
 
-function openPicker(slotKey) {
+function openInlinePicker(slotKey) {
     currentSelectingSlot = slotKey;
-    document.getElementById('picker-title').textContent = `選擇 ${slotKey} 位置先發球員`;
+    document.querySelectorAll('.pitch-slot').forEach(s => s.classList.remove('active-slot'));
+    document.getElementById(`slot-${slotKey}`).classList.add('active-slot');
+
+    document.getElementById('picker-title').textContent = `替換 ${slotKey} 位置先發球員`;
     let grid = document.getElementById('picker-grid');
     grid.innerHTML = '';
 
@@ -366,18 +426,20 @@ function openPicker(slotKey) {
         grid.innerHTML += buildCardHTML(p, false, `selectPlayerForSlot('${p.id}')`);
     });
 
-    document.getElementById('picker-modal').style.display = 'flex';
+    document.getElementById('inline-picker').classList.add('active');
+    document.getElementById('inline-picker').scrollIntoView({ behavior: 'smooth' });
 }
 
 function selectPlayerForSlot(cardId) {
     playerData.squad[currentSelectingSlot] = cardId;
-    closePicker();
+    closeInlinePicker();
     saveData();
     updateUI();
 }
 
-function closePicker() {
-    document.getElementById('picker-modal').style.display = 'none';
+function closeInlinePicker() {
+    document.getElementById('inline-picker').classList.remove('active');
+    document.querySelectorAll('.pitch-slot').forEach(s => s.classList.remove('active-slot'));
 }
 
 function autoOptimizeSquad() {
@@ -394,47 +456,98 @@ function autoOptimizeSquad() {
     updateUI();
 }
 
-// 4. 50 關 PVE 闖關系統
+// 5. 50 關 PVE 與對戰詳情
 function renderStages() {
     let grid = document.getElementById('stage-grid');
     grid.innerHTML = '';
 
-    for (let i = 1; i <= 50; i++) {
-        let isCleared = i <= playerData.clearedStages;
-        let enemyOvr = 65 + Math.floor(i * 0.9);
+    PVE_TEAMS.forEach(st => {
+        let isCleared = st.id <= playerData.clearedStages;
+        let isSelected = st.id === selectedStageNum;
         grid.innerHTML += `
-            <div class="stage-card ${isCleared ? 'cleared' : ''}" onclick="playPVEStage(${i}, ${enemyOvr})">
-                <div style="font-size:12px; color:var(--text-sub);">第 ${i} 關</div>
-                <div style="font-weight:bold; color:var(--accent-gold); font-size:14px;">OVR ${enemyOvr}</div>
-                <div style="font-size:11px; margin-top:4px;">${isCleared ? '✅ 已通關' : '⚔️ 挑戰'}</div>
+            <div class="stage-card ${isCleared ? 'cleared' : ''} ${isSelected ? 'selected' : ''}" onclick="selectStage(${st.id})">
+                <div style="font-size:11px; color:var(--text-sub);">第 ${st.id} 關</div>
+                <div style="font-weight:bold; color:var(--accent-gold); font-size:12px;">OVR ${st.ovr}</div>
+                <div style="font-size:10px; margin-top:2px;">${isCleared ? '✅ 已通關' : '⚔️ 挑戰'}</div>
             </div>
         `;
-    }
+    });
 }
 
-function playPVEStage(stageNum, enemyOvr) {
-    let myScore = parseInt(document.getElementById('team-ovr').textContent);
-    if (myScore === 0) return alert("請先排滿 11 人先發陣容！");
+function selectStage(num) {
+    selectedStageNum = num;
+    let st = PVE_TEAMS.find(x => x.id === num);
+    
+    document.getElementById('enemy-team-name').textContent = st.name;
+    document.getElementById('enemy-team-ovr').textContent = `戰力 OVR ${st.ovr}`;
+    document.getElementById('enemy-style').textContent = st.style;
+    document.getElementById('enemy-star-name').textContent = st.starName;
+    document.getElementById('enemy-star-desc').textContent = st.starDesc;
 
-    let isWin = myScore + (Math.random()*6 - 3) >= enemyOvr;
-    let reward = isWin ? (stageNum * 50 + 200) : 100;
+    document.getElementById('match-report').style.display = 'none';
+    renderStages();
+}
+
+function startPVEMatch() {
+    let myOvr = parseInt(document.getElementById('team-ovr').textContent);
+    if (myOvr === 0) return alert("請先排滿 11 人先發陣容！");
+
+    let st = PVE_TEAMS.find(x => x.id === selectedStageNum);
+    let enemyOvr = st.ovr;
+
+    // 比分計算機制
+    let diff = myOvr - enemyOvr;
+    let myGoals = Math.max(0, Math.floor(Math.random() * 3 + (diff > 0 ? 1 : 0) + (diff > 10 ? 2 : 0)));
+    let enemyGoals = Math.max(0, Math.floor(Math.random() * 3 + (diff < 0 ? 1 : 0)));
+
+    let isWin = myGoals > enemyGoals || (myGoals === enemyGoals && myOvr >= enemyOvr);
+    if (myGoals === enemyGoals) { myGoals += isWin ? 1 : 0; }
+
+    let reward = isWin ? (selectedStageNum * 60 + 300) : 100;
     playerData.coins += reward;
 
-    if (isWin && stageNum > playerData.clearedStages) {
-        playerData.clearedStages = stageNum;
+    if (isWin && selectedStageNum > playerData.clearedStages) {
+        playerData.clearedStages = selectedStageNum;
     }
 
-    document.getElementById('pve-log').innerHTML = `
-        ⚔️ <b>第 ${stageNum} 關對決結果：</b><br>
-        你的首發戰力：<b>${myScore}</b> vs 電腦戰力：<b>${enemyOvr}</b><br>
-        比賽結果：<b style="color:${isWin ? 'var(--accent-gold)' : 'var(--accent-rose)'}">${isWin ? `🎉 勝利！(獲得 $${reward})` : `❌ 敗北 (獲得 $${reward} 鼓勵金)`}</b>
+    // 生成對戰詳情數據
+    let possession = Math.min(75, Math.max(30, 50 + diff * 2));
+    let myShots = Math.floor(myGoals * 3 + Math.random() * 4);
+    let enemyShots = Math.floor(enemyGoals * 3 + Math.random() * 4);
+
+    document.getElementById('match-score-display').innerHTML = `
+        <span style="color:var(--accent-cyan);">我方陣容 ${myGoals}</span> - <span style="color:var(--accent-rose);">${enemyGoals} ${st.name}</span>
     `;
+
+    document.getElementById('stat-possession').textContent = `${possession}% vs ${100 - possession}%`;
+    document.getElementById('stat-shots').textContent = `${myShots}(${myGoals + 2}) vs ${enemyShots}(${enemyGoals + 1})`;
+    document.getElementById('stat-pass').textContent = `${82 + Math.floor(Math.random()*10)}% vs ${75 + Math.floor(Math.random()*10)}%`;
+
+    // 獲得先發陣容球員名單作為進球者
+    let ownedSquad = Object.values(playerData.squad).map(id => DATABASE.find(x => x.id === id)).filter(x => x);
+    let goalTimelineHTML = '';
+
+    for (let g = 0; g < myGoals; g++) {
+        let scorer = ownedSquad.length > 0 ? ownedSquad[Math.floor(Math.random()*ownedSquad.length)].name : "前鋒球員";
+        let min = Math.floor(Math.random() * 85 + 1);
+        goalTimelineHTML += `<li><b style="color:var(--accent-cyan);">${min}' 進球！</b> 我方 [${scorer}] 破門得分</li>`;
+    }
+    for (let eg = 0; eg < enemyGoals; eg++) {
+        let min = Math.floor(Math.random() * 85 + 1);
+        goalTimelineHTML += `<li><b style="color:var(--accent-rose);">${min}' 對手進球！</b> ${st.starName} 攻門得分</li>`;
+    }
+
+    document.getElementById('goal-timeline').innerHTML = goalTimelineHTML || "<li>全場防守嚴密，無突破進球</li>";
+    document.getElementById('stat-mvp').textContent = isWin ? (ownedSquad[0] ? ownedSquad[0].name : "Zhenhe Son") : st.starName;
+
+    document.getElementById('match-reward-text').textContent = isWin ? `🎉 比賽勝利！獲得獎勵 $${reward}` : `❌ 比賽敗北！獲得鼓勵金 $${reward}`;
+    document.getElementById('match-report').style.display = 'block';
 
     saveData();
     updateUI();
 }
 
-// 5. 抽卡機制
+// 6. 抽卡機制
 function drawGacha(count) {
     let cost = count === 1 ? 200 : 1800;
     if (playerData.coins < cost) return alert("金幣不足！請多打 PVE 關卡賺取獎金！");
@@ -465,7 +578,7 @@ function drawGacha(count) {
     updateUI();
 }
 
-// 6. 圖鑑展示
+// 7. 圖鑑展示
 function renderAlbum() {
     let grid = document.getElementById('album-grid');
     grid.innerHTML = '';
