@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚽ 足球卡牌大師 1.0 | 5大聯賽抽卡養成</title>
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --card-bg: #151d2a;
+            --card-border: #233145;
+            --accent-cyan: #38bdf8;
+            --accent-green: #10b981;
+            --accent-gold: #fbbf24;
+            --accent-rose: #f43f5e;
+            --accent-purple: #a855f7;
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background-color: var(--bg-color); color: var(--text-main); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 20px 10px; }
+        .container { max-width: 1000px; margin: 0 auto; display: flex; flex-direction: column; gap: 15px; }
+
+        .page-view { display: none; }
+        .page-view.active { display: block; }
+
+        /* 登入頁 */
+        .auth-container { max-width: 400px; margin: 60px auto; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 30px; text-align: center; }
+        .auth-input { width: 100%; padding: 12px; margin: 8px 0; background: #0b0f19; border: 1px solid var(--card-border); color: #fff; border-radius: 8px; }
+
+        /* 主介面 Header & Tab */
+        .header-card { text-align: center; background: linear-gradient(135deg, #1e293b, #0f172a); border: 1px solid var(--card-border); border-radius: 16px; padding: 18px; position: relative; }
+        .tab-bar { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 5px; }
+        .tab-btn { background-color: var(--card-bg); color: var(--text-sub); border: 1px solid var(--card-border); padding: 12px 18px; border-radius: 10px; font-weight: bold; cursor: pointer; white-space: nowrap; }
+        .tab-btn.active { background: linear-gradient(135deg, var(--accent-cyan), #0284c7); color: #000; }
+        .tab-content { display: none; background-color: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 20px; }
+        .tab-content.active { display: block; }
+
+        /* 🎴 卡牌樣式 (Soccer Card CSS) */
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; margin-top: 15px; }
+        .soccer-card {
+            width: 100%; height: 240px; border-radius: 14px; position: relative; background: #1e293b;
+            border: 2px solid #334155; padding: 10px; display: flex; flex-direction: column; align-items: center;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.5); transition: transform 0.2s, box-shadow 0.2s; overflow: hidden;
+        }
+        .soccer-card:hover { transform: translateY(-5px); box-shadow: 0 12px 24px rgba(56, 189, 248, 0.3); }
+        .soccer-card.SSR { border-color: var(--accent-gold); background: linear-gradient(145deg, #2a1f00, #1e1b18); box-shadow: 0 0 12px rgba(251, 191, 36, 0.4); }
+        .soccer-card.SR { border-color: var(--accent-purple); background: linear-gradient(145deg, #1e102d, #181528); }
+        .soccer-card.R { border-color: var(--accent-cyan); }
+        .soccer-card.locked { filter: grayscale(100%); opacity: 0.4; }
+
+        .card-rarity { position: absolute; top: 8px; right: 10px; font-weight: 900; font-size: 12px; }
+        .card-rarity.SSR { color: var(--accent-gold); }
+        .card-rarity.SR { color: var(--accent-purple); }
+        .card-rarity.R { color: var(--accent-cyan); }
+
+        .card-ovr { position: absolute; top: 8px; left: 10px; font-size: 18px; font-weight: 900; color: #fff; }
+        .card-pos { font-size: 10px; color: var(--text-sub); display: block; }
+        .card-img { width: 85px; height: 85px; border-radius: 50%; object-fit: cover; margin-top: 25px; border: 2px solid var(--card-border); background: #000; }
+        .card-name { font-size: 14px; font-weight: bold; margin-top: 8px; text-align: center; color: #fff; }
+        .card-club { font-size: 11px; color: var(--text-sub); text-align: center; }
+
+        /* 按鈕樣式 */
+        .action-btn { background: #1e293b; color: #fff; border: 1px solid var(--card-border); padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .btn-gold { background: linear-gradient(135deg, #eab308, #ca8a04); color: #000; }
+        .btn-purple { background: linear-gradient(135deg, #a855f7, #7e22ce); color: #fff; }
+
+        /* 抽卡展演區 */
+        .gacha-display { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 20px; min-height: 250px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- 登入頁面 -->
+    <div id="view-auth" class="page-view active">
+        <div class="auth-container">
+            <h2 style="color:var(--accent-cyan);">⚽ 足球卡牌大師</h2>
+            <p style="color:var(--text-sub); font-size:13px; margin-bottom:15px;">五大聯賽球星蒐集與卡牌對戰</p>
+            <input type="text" id="auth-user" class="auth-input" placeholder="輸入玩家帳號">
+            <button class="action-btn btn-gold" style="width:100%; margin-top:10px;" onclick="handleLogin()">開始集卡征戰</button>
+        </div>
+    </div>
+
+    <!-- 主遊戲介面 -->
+    <div id="view-game" class="page-view">
+        <div class="header-card">
+            <h1>⚽ 足球卡牌大師 (FTCG)</h1>
+            <p style="font-size:13px; color:var(--accent-gold); margin-top:5px;">
+                👤 經理人：<span id="player-id">-</span> | 💰 金幣：$<span id="player-coins">1000</span> | 🏆 團隊總戰力：<span id="team-ovr">0</span>
+            </p>
+            <button onclick="handleLogout()" style="position:absolute; right:15px; top:15px; background:var(--accent-rose); border:none; color:#fff; padding:6px 12px; border-radius:6px; cursor:pointer;">登出</button>
+        </div>
+
+        <div class="tab-bar">
+            <button class="tab-btn active" onclick="switchTab(event, 'tab-gacha')">🎰 球星抽卡</button>
+            <button class="tab-btn" onclick="switchTab(event, 'tab-album')">📖 卡牌庫 (<span id="album-count">0</span>/12)</button>
+            <button class="tab-btn" onclick="switchTab(event, 'tab-squad')">👕 我的最佳陣容</button>
+            <button class="tab-btn" onclick="switchTab(event, 'tab-arena')">⚔️ 100人卡牌天梯</button>
+        </div>
+
+        <!-- 1. 抽卡系統 -->
+        <div id="tab-gacha" class="tab-content active" style="text-align:center;">
+            <h3>🌟 五大聯賽球星卡池</h3>
+            <p style="color:var(--text-sub); font-size:13px; margin-top:5px;">包含 SSR Haaland, Mbappé, De Bruyne 等現役超級巨星！</p>
+            <p style="color:var(--accent-gold); font-size:12px;">機率：SSR 5% | SR 25% | R 70%</p>
+            
+            <div style="margin: 20px 0; display:flex; justify-content:center; gap:15px;">
+                <button class="action-btn btn-gold" onclick="drawGacha(1)">🎯 單抽 ($200)</button>
+                <button class="action-btn btn-purple" onclick="drawGacha(10)">🔥 10 連抽 ($1800 優惠)</button>
+            </div>
+
+            <div id="gacha-result" class="gacha-display"></div>
+        </div>
+
+        <!-- 2. 卡牌圖鑑庫 -->
+        <div id="tab-album" class="tab-content">
+            <h3>📖 球星圖鑑庫</h3>
+            <p style="color:var(--text-sub); font-size:13px;">收集五大聯賽球員，提升你的卡牌庫收藏率！</p>
+            <div id="album-grid" class="card-grid"></div>
+        </div>
+
+        <!-- 3. 我的陣容 -->
+        <div id="tab-squad" class="tab-content">
+            <h3>👕 最佳首發陣容</h3>
+            <p style="color:var(--text-sub); font-size:13px;">系統自動選出你擁有的最高戰力球員組成先發隊伍！</p>
+            <div id="squad-grid" class="card-grid"></div>
+        </div>
+
+        <!-- 4. 天梯戰術競技場 -->
+        <div id="tab-arena" class="tab-content">
+            <h3>⚔️ 100 人卡牌天梯賽</h3>
+            <p style="color:var(--text-sub); font-size:13px;">憑藉先發陣容戰力與策略挑戰全球球隊！</p>
+            <button class="action-btn btn-gold" style="width:100%; margin: 15px 0;" onclick="playRankedMatch()">🔍 匹配天梯隊手</button>
+            <div id="arena-log" style="background:#0b0f19; padding:12px; border-radius:8px; font-size:13px; min-height:100px;">準備迎戰...</div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+// 現實五大聯賽球員真實數據與照片庫
+const DATABASE = [
+    { id: "p1", name: "E. Haaland", club: "曼城 (英超)", pos: "ST", ovr: 91, rarity: "SSR", img: "https://images.fineartamerica.com/images/artworkimages/mediumlarge/3/erling-haaland-headshot-dennis-vander-meersch.jpg" },
+    { id: "p2", name: "K. Mbappé", club: "皇馬 (西甲)", pos: "ST", ovr: 91, rarity: "SSR", img: "https://images.fineartamerica.com/images/artworkimages/mediumlarge/3/kylian-mbappe-dennis-vander-meersch.jpg" },
+    { id: "p3", name: "K. De Bruyne", club: "曼城 (英超)", pos: "CM", ovr: 90, rarity: "SSR", img: "https://images.fineartamerica.com/images/artworkimages/mediumlarge/3/kevin-de-bruyne-headshot-dennis-vander-meersch.jpg" },
+    { id: "p4", name: "Vinícius Jr.", club: "皇馬 (西甲)", pos: "LW", ovr: 90, rarity: "SSR", img: "https://images.fineartamerica.com/images/artworkimages/mediumlarge/3/vinicius-junior-dennis-vander-meersch.jpg" },
+    { id: "p5", name: "H. Kane", club: "拜仁 (德甲)", pos: "ST", ovr: 89, rarity: "SR", img: "https://images.fineartamerica.com/images/artworkimages/mediumlarge/3/harry-kane-dennis-vander-meersch.jpg" },
+    { id: "p6", name: "M. Salah", club: "利物浦 (英超)", pos: "RW", ovr: 89, rarity: "SR", img: "https://images.fineartamerica.com/images/artworkimages/mediumlarge/3/mohamed-salah-headshot-dennis-vander-meersch.jpg" },
+    { id: "p7", name: "J. Bellingham", club: "皇馬 (西甲)", pos: "CAM", ovr: 89, rarity: "SR", img: "https://images.fineartamerica.com/images/artworkimages/mediumlarge/3/jude-bellingham-dennis-vander-meersch.jpg" },
+    { id: "p8", name: "L. Modrić", club: "皇馬 (西甲)", pos: "CM", ovr: 86, rarity: "SR", img: "https://images.fineartamerica.com/images/artworkimages/mediumlarge/3/luka-modric-dennis-vander-meersch.jpg" },
+    { id: "p9", name: "Bukayo Saka", club: "阿森納 (英超)", pos: "RW", ovr: 87, rarity: "SR", img: "https://images.fineartamerica.com/images/artworkimages/mediumlarge/3/bukayo-saka-dennis-vander-meersch.jpg" },
+    { id: "p10", name: "Son Heung-min", club: "熱刺 (英超)", pos: "LW", ovr: 87, rarity: "R", img: "https://images.fineartamerica.com/images/artworkimages/mediumlarge/3/son-heung-min-dennis-vander-meersch.jpg" },
+    { id: "p11", name: "Pedri", club: "巴塞隆納 (西甲)", pos: "CM", ovr: 86, rarity: "R", img: "https://images.fineartamerica.com/images/artworkimages/mediumlarge/3/pedri-dennis-vander-meersch.jpg" },
+    { id: "p12", name: "zhen he (特規)", club: "自由球員", pos: "CAM", ovr: 99, rarity: "SSR", img: "https://images.fineartamerica.com/images/artworkimages/mediumlarge/3/lionel-messi-dennis-vander-meersch.jpg" }
+];
+
+let currentUser = null;
+let playerData = { coins: 1000, cards: [] };
+
+function handleLogin() {
+    let u = document.getElementById('auth-user').value.trim();
+    if (!u) return alert("請輸入帳號");
+    currentUser = u;
+
+    let local = localStorage.getItem('ftcg_user_' + u);
+    if (local) {
+        playerData = JSON.parse(local);
+    } else {
+        playerData = { coins: 1200, cards: ["p10"] }; // 初始贈送孫興慜
+        saveData();
+    }
+
+    document.getElementById('view-auth').classList.remove('active');
+    document.getElementById('view-game').classList.add('active');
+    document.getElementById('player-id').textContent = currentUser;
+    updateUI();
+}
+
+function handleLogout() {
+    saveData();
+    document.getElementById('view-game').classList.remove('active');
+    document.getElementById('view-auth').classList.add('active');
+}
+
+function saveData() {
+    if (currentUser) {
+        localStorage.setItem('ftcg_user_' + currentUser, JSON.stringify(playerData));
+    }
+}
+
+function updateUI() {
+    document.getElementById('player-coins').textContent = playerData.coins;
+    document.getElementById('album-count').textContent = playerData.cards.length;
+    renderAlbum();
+    renderSquad();
+}
+
+function buildCardHTML(p, isLocked = false) {
+    return `
+        <div class="soccer-card ${p.rarity} ${isLocked ? 'locked' : ''}">
+            <span class="card-ovr">${p.ovr}<span class="card-pos">${p.pos}</span></span>
+            <span class="card-rarity ${p.rarity}">${p.rarity}</span>
+            <img class="card-img" src="${p.img}" alt="${p.name}" onerror="this.src='https://via.placeholder.com/85?text=FC'">
+            <div class="card-name">${p.name}</div>
+            <div class="card-club">${p.club}</div>
+        </div>
+    `;
+}
+
+function drawGacha(count) {
+    let cost = count === 1 ? 200 : 1800;
+    if (playerData.coins < cost) return alert("金幣不足！");
+
+    playerData.coins -= cost;
+    let resContainer = document.getElementById('gacha-result');
+    resContainer.innerHTML = '';
+
+    for (let i = 0; i < count; i++) {
+        let rand = Math.random() * 100;
+        let pool = [];
+        if (rand < 5) pool = DATABASE.filter(x => x.rarity === "SSR");
+        else if (rand < 30) pool = DATABASE.filter(x => x.rarity === "SR");
+        else pool = DATABASE.filter(x => x.rarity === "R");
+
+        let picked = pool[Math.floor(Math.random() * pool.length)];
+
+        // 重複抽取獎勵機制
+        if (!playerData.cards.includes(picked.id)) {
+            playerData.cards.push(picked.id);
+        } else {
+            playerData.coins += 50; // 重複卡補償金幣
+        }
+
+        resContainer.innerHTML += buildCardHTML(picked);
+    }
+
+    saveData();
+    updateUI();
+}
+
+function renderAlbum() {
+    let grid = document.getElementById('album-grid');
+    grid.innerHTML = '';
+    DATABASE.forEach(p => {
+        let isOwned = playerData.cards.includes(p.id);
+        grid.innerHTML += buildCardHTML(p, !isOwned);
+    });
+}
+
+function renderSquad() {
+    let grid = document.getElementById('squad-grid');
+    grid.innerHTML = '';
+    let owned = DATABASE.filter(p => playerData.cards.includes(p.id));
+    owned.sort((a,b) => b.ovr - a.ovr);
+
+    let totalOvr = 0;
+    owned.forEach(p => {
+        totalOvr += p.ovr;
+        grid.innerHTML += buildCardHTML(p);
+    });
+
+    let teamScore = owned.length > 0 ? Math.floor(totalOvr / owned.length) : 0;
+    document.getElementById('team-ovr').textContent = teamScore;
+}
+
+function switchTab(evt, tabId) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    evt.currentTarget.classList.add('active');
+    document.getElementById(tabId).classList.add('active');
+}
+
+function playRankedMatch() {
+    let owned = DATABASE.filter(p => playerData.cards.includes(p.id));
+    if (owned.length === 0) return alert("隊伍中尚無任何球員！");
+
+    let myScore = owned.reduce((sum, p) => sum + p.ovr, 0) / owned.length;
+    let oppScore = 75 + Math.floor(Math.random() * 20);
+
+    let isWin = myScore >= oppScore;
+    let reward = isWin ? 300 : 100;
+    playerData.coins += reward;
+
+    document.getElementById('arena-log').innerHTML = `
+        ⚔️ 天梯對決結果：<br>
+        你的陣容平均戰力：<b>${Math.floor(myScore)}</b> vs 對手戰力：<b>${oppScore}</b><br>
+        比賽結果：<b style="color:${isWin ? 'var(--accent-gold)' : 'var(--accent-rose)'}">${isWin ? '勝利 (獲得 $300)' : '敗北 (獲得 $100)'}</b>
+    `;
+
+    saveData();
+    updateUI();
+}
+</script>
+</body>
+</html>
