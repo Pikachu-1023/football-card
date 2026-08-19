@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="google" content="notranslate">
-    <title>⚽ 足球卡牌大師 3.1 | 製作人：孫振賀</title>
+    <title>⚽ 足球卡牌大師 3.1 (五大聯賽與傳奇重製版)</title>
     <style>
         :root {
             --bg-color: #0b0f19;
@@ -15,6 +15,7 @@
             --accent-gold: #fbbf24;
             --accent-rose: #f43f5e;
             --accent-purple: #a855f7;
+            --accent-legend: #f43f5e;
             --text-main: #f8fafc;
             --text-sub: #94a3b8;
         }
@@ -39,19 +40,21 @@
         .tab-content.active { display: block; }
 
         /* 🎴 卡牌樣式 */
-        .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; margin-top: 15px; }
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(135px, 1fr)); gap: 12px; margin-top: 15px; }
         .soccer-card {
-            width: 100%; height: 230px; border-radius: 12px; position: relative; background: #1e293b;
+            width: 100%; height: 235px; border-radius: 12px; position: relative; background: #1e293b;
             border: 2px solid #334155; padding: 8px; display: flex; flex-direction: column; align-items: center;
             box-shadow: 0 6px 12px rgba(0,0,0,0.4); transition: transform 0.2s; overflow: hidden; cursor: pointer;
         }
         .soccer-card:hover { transform: translateY(-4px); }
+        .soccer-card.LEGEND { border-color: #f43f5e; background: linear-gradient(145deg, #4c0519, #1a050d); box-shadow: 0 0 10px rgba(244,63,94,0.4); }
         .soccer-card.SSR { border-color: var(--accent-gold); background: linear-gradient(145deg, #322300, #1e1b18); }
         .soccer-card.SR { border-color: var(--accent-purple); background: linear-gradient(145deg, #251238, #181528); }
         .soccer-card.R { border-color: var(--accent-cyan); }
-        .soccer-card.locked { filter: grayscale(100%); opacity: 0.3; }
+        .soccer-card.locked { filter: grayscale(100%); opacity: 0.25; }
 
         .card-rarity { position: absolute; top: 6px; right: 8px; font-weight: 900; font-size: 11px; }
+        .card-rarity.LEGEND { color: #f43f5e; }
         .card-rarity.SSR { color: var(--accent-gold); }
         .card-rarity.SR { color: var(--accent-purple); }
         .card-rarity.R { color: var(--accent-cyan); }
@@ -59,11 +62,11 @@
         .card-ovr { position: absolute; top: 6px; left: 8px; font-size: 16px; font-weight: 900; color: #fff; }
         .card-pos { font-size: 10px; color: var(--text-sub); display: block; }
         .card-img { width: 75px; height: 75px; border-radius: 50%; object-fit: cover; margin-top: 22px; border: 2px solid var(--card-border); background: #0f172a; }
-        .card-name { font-size: 13px; font-weight: bold; margin-top: 6px; text-align: center; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
+        .card-name { font-size: 12px; font-weight: bold; margin-top: 6px; text-align: center; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
         .card-nation { font-size: 10px; color: var(--accent-cyan); margin-top: 2px; }
-        .card-club { font-size: 10px; color: var(--text-sub); text-align: center; margin-top: 1px; }
+        .card-club { font-size: 10px; color: var(--text-sub); text-align: center; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
 
-        /* 📦 國家卡包選擇區 */
+        /* 📦 卡包選擇區 */
         .pack-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; margin-top: 15px; }
         .pack-card { background: linear-gradient(135deg, #1e293b, #0f172a); border: 2px solid var(--card-border); border-radius: 12px; padding: 12px; text-align: center; cursor: pointer; transition: 0.2s; }
         .pack-card:hover, .pack-card.selected { border-color: var(--accent-gold); transform: translateY(-3px); background: linear-gradient(135deg, #2a384c, #152033); }
@@ -78,23 +81,23 @@
         }
         .pitch-row { display: flex; justify-content: space-around; align-items: center; }
         .pitch-slot {
-            width: 100px; height: 130px; background: rgba(0,0,0,0.4); border: 2px dashed rgba(255,255,255,0.5);
+            width: 95px; height: 125px; background: rgba(0,0,0,0.45); border: 2px dashed rgba(255,255,255,0.5);
             border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center;
             cursor: pointer; position: relative; transition: all 0.2s; padding: 5px; text-align: center;
         }
-        .pitch-slot:hover, .pitch-slot.active-slot { border-color: var(--accent-gold); background: rgba(0,0,0,0.7); transform: scale(1.05); }
+        .pitch-slot:hover, .pitch-slot.active-slot { border-color: var(--accent-gold); background: rgba(0,0,0,0.75); transform: scale(1.05); }
         .slot-title { position: absolute; top: 4px; font-size: 10px; color: var(--accent-gold); font-weight: bold; }
 
         .pitch-player-avatar { width: 48px; height: 48px; border-radius: 50%; border: 2px solid #fff; margin-top: 15px; object-fit: cover; }
-        .pitch-player-name { font-size: 11px; font-weight: bold; color: #fff; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
+        .pitch-player-name { font-size: 10px; font-weight: bold; color: #fff; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
         .pitch-player-ovr { font-size: 11px; color: var(--accent-gold); font-weight: 900; }
 
-        /* 內嵌選擇替換區 */
+        /* 替換選單面板 */
         .inline-panel { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 15px; margin-top: 15px; display: none; }
         .inline-panel.active { display: block; }
 
-        /* 🎮 50 關 PVE */
-        .stage-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; margin-top: 15px; max-height: 250px; overflow-y: auto; padding-right: 5px; }
+        /* PVE 模式 */
+        .stage-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px; margin-top: 15px; max-height: 250px; overflow-y: auto; padding-right: 5px; }
         .stage-card { background: #1e293b; border: 1px solid var(--card-border); border-radius: 8px; padding: 8px; text-align: center; cursor: pointer; transition: 0.2s; }
         .stage-card:hover, .stage-card.selected { border-color: var(--accent-cyan); background: #334155; }
         .stage-card.cleared { border-color: var(--accent-green); background: #064e3b; }
@@ -116,7 +119,7 @@
         <div class="auth-container">
             <h2 style="color:var(--accent-cyan);">⚽ 足球卡牌大師 3.1</h2>
             <p style="color:var(--accent-gold); font-size:13px; font-weight:bold; margin-top:4px;">👑 遊戲製作人：孫振賀</p>
-            <p style="color:var(--text-sub); font-size:12px; margin:12px 0 20px;">國家主題卡包與特別球員介紹 × 50關對戰詳情</p>
+            <p style="color:var(--text-sub); font-size:12px; margin:12px 0 20px;">五大聯賽俱樂部 + 歷史傳奇星陣 × 50關聯賽對決</p>
             <input type="text" id="auth-user" class="auth-input" placeholder="請輸入玩家帳號">
             <button class="action-btn btn-gold" style="width:100%; margin-top:10px;" onclick="handleLogin()">進入遊戲</button>
         </div>
@@ -136,7 +139,7 @@
         <div class="tab-bar">
             <button class="tab-btn active" onclick="switchTab(event, 'tab-squad')">👕 11人制排陣</button>
             <button class="tab-btn" onclick="switchTab(event, 'tab-pve')">⚔️ 50關聯賽對戰</button>
-            <button class="tab-btn" onclick="switchTab(event, 'tab-gacha')">📦 國家主題卡包抽卡</button>
+            <button class="tab-btn" onclick="switchTab(event, 'tab-gacha')">📦 五大聯賽 & 傳奇抽卡</button>
             <button class="tab-btn" onclick="switchTab(event, 'tab-album')">📖 卡牌圖鑑 (<span id="album-count">0</span>/300)</button>
         </div>
 
@@ -146,7 +149,7 @@
                 <h3>👕 最佳 11 人首發陣容 (4-3-3 陣型)</h3>
                 <button class="action-btn btn-gold" onclick="autoOptimizeSquad()">✨ 自動最佳化首發</button>
             </div>
-            <p style="color:var(--text-sub); font-size:12px; margin-top:4px;">點擊場上位置，下方將直接展開球員庫進行替換！</p>
+            <p style="color:var(--text-sub); font-size:12px; margin-top:4px;">點擊場上位置，即可展開替換選單！</p>
             
             <div class="pitch-container">
                 <div class="pitch-row">
@@ -170,7 +173,6 @@
                 </div>
             </div>
 
-            <!-- 下方嵌入式球員選擇面板 -->
             <div id="inline-picker" class="inline-panel">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <h4 id="picker-title" style="color:var(--accent-cyan);">選擇先發球員</h4>
@@ -183,7 +185,7 @@
         <!-- 2. 50 關 PVE 模式 -->
         <div id="tab-pve" class="tab-content">
             <h3>⚔️ 50 關電腦聯賽賽程</h3>
-            <p style="color:var(--text-sub); font-size:13px;">點擊關卡查看球隊情報與關鍵球員，發起對決！</p>
+            <p style="color:var(--text-sub); font-size:13px;">點擊關卡查看對方陣容情報與核心球星，發起對決！</p>
 
             <div id="stage-grid" class="stage-grid"></div>
 
@@ -197,7 +199,7 @@
                 </div>
                 <div style="font-size:13px; background:#0b0f19; padding:10px; border-radius:8px; border-left:3px solid var(--accent-cyan);">
                     <b style="color:var(--accent-cyan);">🌟 核心球星：</b><span id="enemy-star-name">小將阿里</span><br>
-                    <span id="enemy-star-desc" style="font-size:12px; color:var(--text-sub);">青訓營最具潛力的18歲新星，具備極強突破爆發力。</span>
+                    <span id="enemy-star-desc" style="font-size:12px; color:var(--text-sub);">青訓營最具潛力的18歲新星。</span>
                 </div>
 
                 <button class="action-btn btn-gold" style="width:100%; font-size:16px; margin-top:5px;" onclick="startPVEMatch()">⚔️ 開始對決比賽</button>
@@ -223,14 +225,13 @@
             </div>
         </div>
 
-        <!-- 3. 國家卡包抽卡系統 (含特別球員介紹) -->
+        <!-- 3. 卡包抽卡系統 -->
         <div id="tab-gacha" class="tab-content" style="text-align:center;">
-            <h3>📦 選擇國家主題卡包抽卡</h3>
-            <p style="color:var(--text-sub); font-size:13px; margin-top:5px;">選擇主題卡包，大幅提升獲得該國家/地區頂級球星的機率！</p>
+            <h3>📦 選擇主題卡包抽卡</h3>
+            <p style="color:var(--text-sub); font-size:13px; margin-top:5px;">包含五大聯賽頂級豪門、台灣/亞洲特別星陣與歷代傳奇巨星包！</p>
             
             <div id="pack-selector" class="pack-grid"></div>
 
-            <!-- 卡包特別球員介紹面板 -->
             <div id="pack-info" class="pack-info-box"></div>
 
             <div style="margin: 20px 0; display:flex; justify-content:center; gap:15px;">
@@ -251,113 +252,137 @@
 </div>
 
 <script>
-// 生成繪製 SVG Data URI
-function generateAvatarSVG(name, isSpecial) {
+// 徹底消除 HTML 屬性轉義與 SVG 引號衝突的超穩定頭像生成器
+function generateAvatarSVG(name, rarity, pos) {
     var parts = name.split(' ');
     var initials = parts.length > 1 ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase() : name.substring(0, 2).toUpperCase();
-    var bgCol = isSpecial ? '%233b82f6' : '%231e293b';
-    var txtCol = isSpecial ? '%23fbbf24' : '%2338bdf8';
+    
+    var bgCol = '#1e293b';
+    var strokeCol = '#38bdf8';
+    var textCol = '#38bdf8';
 
-    var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100">' +
+    if (rarity === 'LEGEND') {
+        bgCol = '#4c0519';
+        strokeCol = '#f43f5e';
+        textCol = '#fda4af';
+    } else if (rarity === 'SSR') {
+        bgCol = '#322300';
+        strokeCol = '#fbbf24';
+        textCol = '#fbbf24';
+    } else if (rarity === 'SR') {
+        bgCol = '#251238';
+        strokeCol = '#a855f7';
+        textCol = '#c084fc';
+    }
+
+    var rawSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100">' +
         '<rect width="100" height="100" fill="' + bgCol + '"/>' +
-        '<circle cx="50" cy="38" r="22" fill="%23334155"/>' +
-        '<path d="M 20 88 C 20 62, 80 62, 80 88 Z" fill="%23334155"/>' +
-        '<text x="50" y="52" font-family="Arial" font-size="28" font-weight="900" fill="' + txtCol + '" text-anchor="middle">' + initials + '</text>' +
+        '<circle cx="50" cy="36" r="22" fill="#0f172a" stroke="' + strokeCol + '" stroke-width="2"/>' +
+        '<path d="M 20 88 C 20 62, 80 62, 80 88 Z" fill="#0f172a" stroke="' + strokeCol + '" stroke-width="2"/>' +
+        '<text x="50" y="44" font-family="Arial, sans-serif" font-size="22" font-weight="900" fill="' + textCol + '" text-anchor="middle">' + initials + '</text>' +
         '</svg>';
 
-    return 'data:image/svg+xml;utf8,' + svg;
+    return 'data:image/svg+xml;utf8,' + encodeURIComponent(rawSvg);
 }
 
-// 國家卡包定義與特別球員介紹
+// 8 大多樣化卡包
 var COUNTRY_PACKS = [
-    { 
-        id: 'ALL', 
-        name: '🌍 全球全明星包', 
-        flag: '🌐', 
-        nationFilter: 'ALL',
-        specialPlayers: '包含全庫 300 名球員！包括 製作人 孫振賀 (OVR 99)、哈蘭德 (OVR 92)、姆巴佩 (OVR 92)、梅西 (OVR 91) 等所有 SSR 傳奇球星。'
-    },
-    { 
-        id: 'TW_ASIA', 
-        name: '🇹🇼 台灣 & 亞洲特別包', 
-        flag: '🇹🇼', 
-        nationFilter: ['🇹🇼 台灣', '🇰🇷 韓國'],
-        specialPlayers: '🌟 特別限定主打：製作人 孫振賀 Zhenhe Son (OVR 99 滿級全能 CAM)、韓國球星孫興慜等亞洲頂級戰力！'
-    },
-    { 
-        id: 'ARG_BRA', 
-        name: '🇦🇷 阿根廷 & 巴西包', 
-        flag: '🇦🇷', 
-        nationFilter: ['🇦🇷 阿根廷', '🇧🇷 巴西'],
-        specialPlayers: '🌟 主打特別球員：球聖 L. Messi (OVR 91 翼鋒)、桑巴軍團 Vinícius Jr. (OVR 90 邊鋒) 及多位南美精銳。'
-    },
-    { 
-        id: 'FRA_NOR', 
-        name: '🇫🇷 法國 & 挪威包', 
-        flag: '🇫🇷', 
-        nationFilter: ['🇫🇷 法國', '🇳🇴 挪威'],
-        specialPlayers: '🌟 主打特別球員：新時代雙雙魔王 E. Haaland (OVR 92 衝鋒中鋒)、K. Mbappé (OVR 92 速度中鋒)。'
-    },
-    { 
-        id: 'ENG_POR', 
-        name: '🏴󠁧󠁢󠁥󠁮󠁧󠁿 英格蘭 & 葡萄牙包', 
-        flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', 
-        nationFilter: ['🏴󠁧󠁢󠁥󠁮󠁧󠁿 英格蘭', '🇵🇹 葡萄牙'],
-        specialPlayers: '🌟 主打特別球員：不滅傳奇 C. Ronaldo (OVR 90 射手)、英超中場大師與新星陣容。'
-    }
+    { id: 'ALL', name: '🌍 全球全明星包', flag: '🌐', filter: 'ALL', desc: '包含全庫 300 名球員，包含所有現役巨星與歷代 LEGEND 傳奇！' },
+    { id: 'TW_ASIA', name: '🇹🇼 台灣 & 亞洲包', flag: '🇹🇼', filter: ['🇹🇼 台灣', '🇰🇷 韓國', '🇯🇵 日本'], desc: '🌟 特別限定：製作人 孫振賀 Zhenhe Son (OVR 99 滿級全能 CAM)、孫興慜、三笘薰等亞洲巔峰戰力！' },
+    { id: 'LEGENDS', name: '👑 歷史傳奇巨星包', flag: '🏆', filter: 'LEGEND', desc: '👑 主打歷史球王傳奇：席丹 (Zidane)、羅納度 (R9)、小羅 (Ronaldinho)、貝克漢 (Beckham)、亨利 (Henry) 等殿堂巨星！' },
+    { id: 'EPL', name: '🏴󠁧󠁢󠁥󠁮󠁧󠁿 英超豪門包', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', filter: '英超', desc: '🏴󠁧󠁢󠁥󠁮󠁧󠁿 英超王者專區：哈蘭德 (Haaland)、德布勞內 (De Bruyne)、薩拉赫 (Salah)、薩卡 (Saka)、帕爾默 (Palmer)。' },
+    { id: 'LALIGA', name: '🇪🇸 西甲巨星包', flag: '🇪🇸', filter: '西甲', desc: '🇪🇸 西甲霸權專區：姆巴佩 (Mbappé)、貝林漢姆 (Bellingham)、維尼修斯 (Vinícius)、莫德里奇 (Modrić)。' },
+    { id: 'SERIEA', name: '🇮🇹 意甲精銳包', flag: '🇮🇹', filter: '意甲', desc: '🇮🇹 意甲傳統名門：勞塔羅 (Lautaro)、迪巴拉 (Dybala)、奧斯梅恩 (Osimhen)、巴雷拉 (Barella)。' },
+    { id: 'BUNDES', name: '🇩🇪 德甲王者包', flag: '🇩🇪', filter: '德甲', desc: '🇩🇪 德甲勁旅陣容：凱恩 (Kane)、穆西亞拉 (Musiala)、維爾茨 (Wirtz)、諾伊爾 (Neuer)。' },
+    { id: 'LIGUE1', name: '🇫🇷 法甲勁旅包', flag: '🇫🇷', filter: '法甲', desc: '🇫🇷 法甲豪華戰力：登貝萊 (Dembélé)、阿什拉夫 (Hakimi)、馬爾基尼奧斯 (Marquinhos)。' }
 ];
 
 var selectedPack = 'ALL';
-
-var POSITIONS = ["ST", "LW", "RW", "CAM", "CM", "LB", "LCB", "RCB", "RB", "GK"];
-var CLUBS = ["曼城 (英超)", "皇馬 (西甲)", "拜仁 (德甲)", "巴塞隆納 (西甲)", "阿森納 (英超)", "國米 (意甲)", "巴黎 (法甲)", "自由球員"];
-var NATIONS = ["🇳🇴 挪威", "🇫🇷 法國", "🇧🇪 比利時", "🇧🇷 巴西", "🏴󠁧󠁢󠁥󠁮󠁧󠁿 英格蘭", "🇪🇬 埃及", "🇭🇷 克羅埃西亞", "🇰🇷 韓國", "🇪🇸 西班牙", "🇹🇼 台灣", "🇦🇷 阿根廷", "🇵🇹 葡萄牙"];
-
 var DATABASE = [];
 
-// 著名球星（特別球員）
-var STARS = [
-    { name: "Zhenhe Son", pos: "CAM", ovr: 99, rarity: "SSR", nation: "🇹🇼 台灣", club: "自由球員 (製作人特別卡)" },
+// 名將與退役傳奇球員資料庫
+var FAMOUS_PLAYERS = [
+    // 製作人特別卡
+    { name: "Zhenhe Son", pos: "CAM", ovr: 99, rarity: "SSR", nation: "🇹🇼 台灣", club: "自由球員 (製作人卡)" },
+    
+    // 歷史 LEGEND 傳奇球員
+    { name: "Zinedine Zidane", pos: "CAM", ovr: 95, rarity: "LEGEND", nation: "🇫🇷 法國", club: "皇馬傳奇 (LEGEND)" },
+    { name: "Ronaldinho", pos: "LW", ovr: 95, rarity: "LEGEND", nation: "🇧🇷 巴西", club: "巴塞傳奇 (LEGEND)" },
+    { name: "Ronaldo Nazário", pos: "ST", ovr: 96, rarity: "LEGEND", nation: "🇧🇷 巴西", club: "國米傳奇 (LEGEND)" },
+    { name: "Pelé", pos: "ST", ovr: 98, rarity: "LEGEND", nation: "🇧🇷 巴西", club: "桑托斯傳奇 (LEGEND)" },
+    { name: "Diego Maradona", pos: "CAM", ovr: 97, rarity: "LEGEND", nation: "🇦🇷 阿根廷", club: "拿坡里傳奇 (LEGEND)" },
+    { name: "David Beckham", pos: "RM", ovr: 92, rarity: "LEGEND", nation: "🏴󠁧󠁢󠁥󠁮󠁧󠁿 英格蘭", club: "曼聯傳奇 (LEGEND)" },
+    { name: "Thierry Henry", pos: "ST", ovr: 94, rarity: "LEGEND", nation: "🇫🇷 法國", club: "阿森納傳奇 (LEGEND)" },
+    { name: "Paolo Maldini", pos: "CB", ovr: 94, rarity: "LEGEND", nation: "🇮🇹 義大利", club: "AC米蘭傳奇 (LEGEND)" },
+    { name: "Gianluigi Buffon", pos: "GK", ovr: 93, rarity: "LEGEND", nation: "🇮🇹 義大利", club: "尤文傳奇 (LEGEND)" },
+    { name: "Johan Cruyff", pos: "CF", ovr: 95, rarity: "LEGEND", nation: "🇳🇱 荷蘭", club: "阿賈克斯傳奇 (LEGEND)" },
+
+    // 五大聯賽頂級 SSR 現役名將
     { name: "E. Haaland", pos: "ST", ovr: 92, rarity: "SSR", nation: "🇳🇴 挪威", club: "曼城 (英超)" },
     { name: "K. Mbappé", pos: "ST", ovr: 92, rarity: "SSR", nation: "🇫🇷 法國", club: "皇馬 (西甲)" },
-    { name: "L. Messi", pos: "RW", ovr: 91, rarity: "SSR", nation: "🇦🇷 阿根廷", club: "自由球員" },
+    { name: "J. Bellingham", pos: "CAM", ovr: 91, rarity: "SSR", nation: "🏴󠁧󠁢󠁥󠁮󠁧󠁿 英格蘭", club: "皇馬 (西甲)" },
     { name: "K. De Bruyne", pos: "CAM", ovr: 91, rarity: "SSR", nation: "🇧🇪 比利時", club: "曼城 (英超)" },
-    { name: "C. Ronaldo", pos: "ST", ovr: 90, rarity: "SSR", nation: "🇵🇹 葡萄牙", club: "自由球員" },
-    { name: "Vinícius Jr.", pos: "LW", ovr: 90, rarity: "SSR", nation: "🇧🇷 巴西", club: "皇馬 (西甲)" }
+    { name: "H. Kane", pos: "ST", ovr: 91, rarity: "SSR", nation: "🏴󠁧󠁢󠁥󠁮󠁧󠁿 英格蘭", club: "拜仁 (德甲)" },
+    { name: "M. Salah", pos: "RW", ovr: 90, rarity: "SSR", nation: "🇪🇬 埃及", club: "利物浦 (英超)" },
+    { name: "Vinícius Jr.", pos: "LW", ovr: 90, rarity: "SSR", nation: "🇧🇷 巴西", club: "皇馬 (西甲)" },
+    { name: "R. Lewandowski", pos: "ST", ovr: 90, rarity: "SSR", nation: "🇵🇱 波蘭", club: "巴塞隆納 (西甲)" },
+    { name: "L. Messi", pos: "RW", ovr: 91, rarity: "SSR", nation: "🇦🇷 阿根廷", club: "邁阿密國際" },
+    { name: "C. Ronaldo", pos: "ST", ovr: 90, rarity: "SSR", nation: "🇵🇹 葡萄牙", club: "利雅德勝利" },
+    { name: "Son Heung-min", pos: "LW", ovr: 89, rarity: "SSR", nation: "🇰🇷 韓國", club: "熱刺 (英超)" },
+    { name: "F. Wirtz", pos: "CAM", ovr: 89, rarity: "SSR", nation: "🇩🇪 德國", club: "勒沃庫森 (德甲)" },
+    { name: "J. Musiala", pos: "CAM", ovr: 89, rarity: "SSR", nation: "🇩🇪 德國", club: "拜仁 (德甲)" },
+    { name: "Lautaro Martínez", pos: "ST", ovr: 89, rarity: "SSR", nation: "🇦🇷 阿根廷", club: "國際米蘭 (意甲)" },
+    { name: "L. Modrić", pos: "CM", ovr: 88, rarity: "SSR", nation: "🇭🇷 克羅埃西亞", club: "皇馬 (西甲)" },
+    { name: "B. Saka", pos: "RW", ovr: 88, rarity: "SSR", nation: "🏴󠁧󠁢󠁥󠁮󠁧󠁿 英格蘭", club: "阿森納 (英超)" },
+    { name: "Kaoru Mitoma", pos: "LW", ovr: 84, rarity: "SR", nation: "🇯🇵 日本", club: "布萊頓 (英超)" }
 ];
 
-STARS.forEach(function(s, idx) { 
-    DATABASE.push({ id: 'p_' + (idx + 1), name: s.name, pos: s.pos, ovr: s.ovr, rarity: s.rarity, nation: s.nation, club: s.club, img: generateAvatarSVG(s.name, true) }); 
+// 將名將寫入資料庫
+FAMOUS_PLAYERS.forEach(function(s, idx) {
+    DATABASE.push({
+        id: 'p_' + (idx + 1),
+        name: s.name,
+        pos: s.pos,
+        ovr: s.ovr,
+        rarity: s.rarity,
+        nation: s.nation,
+        club: s.club,
+        img: generateAvatarSVG(s.name, s.rarity, s.pos)
+    });
 });
 
-// 擴充生成 300 位球員
-var FIRST_NAMES = ["Alex", "Carlos", "David", "Lucas", "Marco", "Julian", "Gabriel", "Sandro", "Mateo", "Hugo"];
-var LAST_NAMES = ["Silva", "Garcia", "Müller", "Fernandez", "Kim", "Santos", "Rossi", "Smith", "López", "Johnson"];
+// 補充自動生成的球員，達到 300 人圖鑑
+var POSITIONS = ["ST", "LW", "RW", "CAM", "CM", "LB", "LCB", "RCB", "RB", "GK"];
+var CLUBS = ["曼城 (英超)", "皇馬 (西甲)", "拜仁 (德甲)", "國際米蘭 (意甲)", "巴黎聖日耳曼 (法甲)", "阿森納 (英超)", "尤文圖斯 (意甲)"];
+var NATIONS = ["🇳🇴 挪威", "🇫🇷 法國", "🇧🇪 比利時", "🇧🇷 巴西", "🏴󠁧󠁢󠁥󠁮󠁧󠁿 英格蘭", "🇪🇸 西班牙", "🇦🇷 阿根廷", "🇩🇪 德國", "🇮🇹 義大利"];
+var FIRST_NAMES = ["Lucas", "Marco", "Julian", "Gabriel", "Sandro", "Mateo", "Hugo", "Leo", "Enzo", "Oliver"];
+var LAST_NAMES = ["Silva", "Garcia", "Müller", "Fernandez", "Santos", "Rossi", "Smith", "López", "Johnson", "Schneider"];
 
 for (var i = DATABASE.length + 1; i <= 300; i++) {
     var rand = Math.random() * 100;
-    var rarity = rand < 5 ? "SSR" : (rand < 30 ? "SR" : "R");
-    var baseOvr = rarity === "SSR" ? 88 + Math.floor(Math.random()*4) : (rarity === "SR" ? 83 + Math.floor(Math.random()*5) : 70 + Math.floor(Math.random()*12));
+    var rarity = rand < 6 ? "SSR" : (rand < 35 ? "SR" : "R");
+    var baseOvr = rarity === "SSR" ? 86 + Math.floor(Math.random()*4) : (rarity === "SR" ? 81 + Math.floor(Math.random()*5) : 70 + Math.floor(Math.random()*11));
     var fname = FIRST_NAMES[Math.floor(Math.random() * FIRST_NAMES.length)];
     var lname = LAST_NAMES[Math.floor(Math.random() * LAST_NAMES.length)];
     var fullname = fname + ' ' + lname;
+    var pos = POSITIONS[Math.floor(Math.random() * POSITIONS.length)];
 
     DATABASE.push({
         id: 'p_' + i,
         name: fullname,
-        pos: POSITIONS[Math.floor(Math.random() * POSITIONS.length)],
+        pos: pos,
         ovr: baseOvr,
         rarity: rarity,
         nation: NATIONS[Math.floor(Math.random() * NATIONS.length)],
         club: CLUBS[Math.floor(Math.random() * CLUBS.length)],
-        img: generateAvatarSVG(fullname, false)
+        img: generateAvatarSVG(fullname, rarity, pos)
     });
 }
 
-// 50 關獨特球隊資料庫
+// 50 關 PVE 隊伍
 var PVE_TEAMS = [];
-var TEAMS_NAME = ["業餘青訓隊", "橫濱海航", "倫敦藍獅", "馬德里紅白", "米蘭紅黑", "多特黃蜂", "阿姆斯特丹賈府", "巴黎金鵬", "慕尼黑巨人", "曼徹斯特藍月"];
-var STYLES = ["極致高壓壓迫逼搶", "防守反擊地下鐵路", "傳控足球蒂基塔卡", "邊路大錘高空轟炸", "全攻全守大師派系"];
+var TEAMS_NAME = ["業餘青訓隊", "橫濱海航", "倫敦藍獅", "馬德里紅白", "米蘭紅黑", "多特黃蜂", "阿姆斯特丹賈府", "巴黎金鵬", "慕尼黑巨人", "英超全明星"];
+var STYLES = ["極致高壓逼搶", "地下鐵防守反擊", "蒂基塔卡傳控足球", "邊路高空轟炸", "全攻全守大師派系"];
 
 for (var k = 1; k <= 50; k++) {
     var tName = k <= 10 ? '第 ' + k + ' 關：' + TEAMS_NAME[k-1] : (k === 50 ? "第 50 關：宇宙傳奇明星隊" : '第 ' + k + ' 關：' + TEAMS_NAME[k%10] + ' ' + (Math.floor(k/10)+1) + '期');
@@ -366,8 +391,8 @@ for (var k = 1; k <= 50; k++) {
         name: tName,
         ovr: 65 + Math.floor(k * 0.9),
         style: STYLES[k % STYLES.length],
-        starName: k === 50 ? "製作人 孫振賀 / 梅西" : '隊長 ' + FIRST_NAMES[k%10] + ' (No.' + k + ')',
-        starDesc: '該隊核心靈魂，擅長 ' + STYLES[k%STYLES.length] + ' 體系下發揮超強個人作戰能力。'
+        starName: k === 50 ? "製作人 孫振賀 / 席丹" : '隊長 ' + FIRST_NAMES[k%10] + ' (No.' + k + ')',
+        starDesc: '該隊核心靈魂，擅長在 ' + STYLES[k%STYLES.length] + ' 體系下發揮強大個人戰力。'
     });
 }
 
@@ -375,7 +400,7 @@ for (var k = 1; k <= 50; k++) {
 var currentUser = null;
 var playerData = {
     coins: 1500,
-    cards: ["p_1", "p_2", "p_3", "p_4", "p_5", "p_6", "p_7"],
+    cards: ["p_1", "p_2", "p_3", "p_4", "p_5", "p_6", "p_7", "p_8", "p_9", "p_10", "p_11", "p_12"],
     squad: { LW: null, ST: null, RW: null, LCM: null, CAM: null, RCM: null, LB: null, LCB: null, RCB: null, RB: null, GK: null },
     clearedStages: 0
 };
@@ -424,21 +449,23 @@ function updateUI() {
     renderAlbum();
 }
 
+// 構建卡牌 HTML (徹底防止引號破壞屬性)
 function buildCardHTML(p, isLocked, onClickFn) {
     var lockedClass = isLocked ? ' locked' : '';
     var clickAttr = onClickFn ? ' onclick="' + onClickFn + '"' : '';
+    var safeName = p.name.replace(/"/g, '&quot;');
     
     return '<div class="soccer-card ' + p.rarity + lockedClass + '"' + clickAttr + '>' +
         '<span class="card-ovr">' + p.ovr + '<span class="card-pos">' + p.pos + '</span></span>' +
         '<span class="card-rarity ' + p.rarity + '">' + p.rarity + '</span>' +
-        '<img class="card-img" src="' + p.img + '" alt="' + p.name + '">' +
+        '<img class="card-img" src="' + p.img + '" alt="' + safeName + '">' +
         '<div class="card-name">' + p.name + '</div>' +
         '<div class="card-nation">' + p.nation + '</div>' +
         '<div class="card-club">' + p.club + '</div>' +
         '</div>';
 }
 
-// 排陣系統
+// 渲染球場與球員頭像
 function renderPitch() {
     var totalOvr = 0;
     var count = 0;
@@ -452,8 +479,12 @@ function renderPitch() {
             if (p) {
                 totalOvr += p.ovr;
                 count++;
+                
+                var safeName = p.name.replace(/"/g, '&quot;');
+                var imgHtml = '<img class="pitch-player-avatar" src="' + p.img + '" alt="' + safeName + '">';
+                
                 slotEl.innerHTML = '<span class="slot-title">' + slotKey + '</span>' +
-                    '<img class="pitch-player-avatar" src="' + p.img + '" alt="' + p.name + '">' +
+                    imgHtml +
                     '<div class="pitch-player-name">' + p.name + '</div>' +
                     '<div class="pitch-player-ovr">' + p.ovr + '</div>';
                 return;
@@ -512,7 +543,7 @@ function autoOptimizeSquad() {
     updateUI();
 }
 
-// 50 關 PVE 與對戰詳情
+// 50 關 PVE 系統
 function renderStages() {
     var grid = document.getElementById('stage-grid');
     grid.innerHTML = '';
@@ -599,7 +630,7 @@ function startPVEMatch() {
     updateUI();
 }
 
-// 國家卡包選擇與特別球員介紹
+// 8 大主題卡包選擇
 function renderPackSelector() {
     var grid = document.getElementById('pack-selector');
     grid.innerHTML = '';
@@ -623,7 +654,7 @@ function updatePackInfo() {
     var packInfo = COUNTRY_PACKS.find(function(x) { return x.id === selectedPack; });
     var infoBox = document.getElementById('pack-info');
     infoBox.innerHTML = '<h4 style="color:var(--accent-gold); font-size:14px; margin-bottom:5px;">📌 ' + packInfo.name + ' - 特別卡包情報</h4>' +
-        '<p style="font-size:13px; color:var(--text-main); line-height:1.5;">' + packInfo.specialPlayers + '</p>';
+        '<p style="font-size:13px; color:var(--text-main); line-height:1.5;">' + packInfo.desc + '</p>';
 }
 
 function drawGacha(count) {
@@ -641,12 +672,18 @@ function drawGacha(count) {
         var pool = [];
 
         var basePool = DATABASE;
-        if (packInfo.nationFilter !== 'ALL') {
-            basePool = DATABASE.filter(function(x) { return packInfo.nationFilter.includes(x.nation); });
+        if (packInfo.filter !== 'ALL') {
+            if (Array.isArray(packInfo.filter)) {
+                basePool = DATABASE.filter(function(x) { return packInfo.filter.includes(x.nation); });
+            } else if (packInfo.filter === 'LEGEND') {
+                basePool = DATABASE.filter(function(x) { return x.rarity === 'LEGEND'; });
+            } else {
+                basePool = DATABASE.filter(function(x) { return x.club.includes(packInfo.filter); });
+            }
             if (basePool.length === 0) basePool = DATABASE;
         }
 
-        if (rand < 5) pool = basePool.filter(function(x) { return x.rarity === "SSR"; });
+        if (rand < 5) pool = basePool.filter(function(x) { return x.rarity === "LEGEND" || x.rarity === "SSR"; });
         else if (rand < 30) pool = basePool.filter(function(x) { return x.rarity === "SR"; });
         else pool = basePool.filter(function(x) { return x.rarity === "R"; });
 
