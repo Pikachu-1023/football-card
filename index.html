@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-Hant" translate="no">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google" content="notranslate">
     <title>⚽ 足球卡牌大師 1.0 | 5大聯賽抽卡養成</title>
     <style>
         :root {
@@ -37,10 +38,10 @@
         .tab-content { display: none; background-color: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 20px; }
         .tab-content.active { display: block; }
 
-        /* 🎴 卡牌樣式 (Soccer Card CSS) */
+        /* 🎴 卡牌樣式 */
         .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; margin-top: 15px; }
         .soccer-card {
-            width: 100%; height: 240px; border-radius: 14px; position: relative; background: #1e293b;
+            width: 100%; height: 250px; border-radius: 14px; position: relative; background: #1e293b;
             border: 2px solid #334155; padding: 10px; display: flex; flex-direction: column; align-items: center;
             box-shadow: 0 8px 16px rgba(0,0,0,0.5); transition: transform 0.2s, box-shadow 0.2s; overflow: hidden;
         }
@@ -48,7 +49,7 @@
         .soccer-card.SSR { border-color: var(--accent-gold); background: linear-gradient(145deg, #2a1f00, #1e1b18); box-shadow: 0 0 12px rgba(251, 191, 36, 0.4); }
         .soccer-card.SR { border-color: var(--accent-purple); background: linear-gradient(145deg, #1e102d, #181528); }
         .soccer-card.R { border-color: var(--accent-cyan); }
-        .soccer-card.locked { filter: grayscale(100%); opacity: 0.4; }
+        .soccer-card.locked { filter: grayscale(100%); opacity: 0.35; }
 
         .card-rarity { position: absolute; top: 8px; right: 10px; font-weight: 900; font-size: 12px; }
         .card-rarity.SSR { color: var(--accent-gold); }
@@ -59,18 +60,18 @@
         .card-pos { font-size: 10px; color: var(--text-sub); display: block; }
         .card-img { width: 85px; height: 85px; border-radius: 50%; object-fit: cover; margin-top: 25px; border: 2px solid var(--card-border); background: #000; }
         .card-name { font-size: 14px; font-weight: bold; margin-top: 8px; text-align: center; color: #fff; }
-        .card-club { font-size: 11px; color: var(--text-sub); text-align: center; }
+        .card-nation { font-size: 11px; color: var(--accent-cyan); font-weight: 600; margin-top: 2px; }
+        .card-club { font-size: 11px; color: var(--text-sub); text-align: center; margin-top: 1px; }
 
         /* 按鈕樣式 */
         .action-btn { background: #1e293b; color: #fff; border: 1px solid var(--card-border); padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; }
         .btn-gold { background: linear-gradient(135deg, #eab308, #ca8a04); color: #000; }
         .btn-purple { background: linear-gradient(135deg, #a855f7, #7e22ce); color: #fff; }
 
-        /* 抽卡展演區 */
         .gacha-display { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 20px; min-height: 250px; }
     </style>
 </head>
-<body>
+<body class="notranslate">
 
 <div class="container">
 
@@ -133,7 +134,7 @@
         <div id="tab-arena" class="tab-content">
             <h3>⚔️ 100 人卡牌天梯賽</h3>
             <p style="color:var(--text-sub); font-size:13px;">憑藉先發陣容戰力與策略挑戰全球球隊！</p>
-            <button class="action-btn btn-gold" style="width:100%; margin: 15px 0;" onclick="playRankedMatch()">🔍 匹配天梯隊手</button>
+            <button class="action-btn btn-gold" style="width:100%; margin: 15px 0;" onclick="playRankedMatch()">🔍 匹配天梯對手</button>
             <div id="arena-log" style="background:#0b0f19; padding:12px; border-radius:8px; font-size:13px; min-height:100px;">準備迎戰...</div>
         </div>
     </div>
@@ -141,20 +142,20 @@
 </div>
 
 <script>
-// 現實五大聯賽球員真實數據與照片庫
+// 使用穩定 CDN 圖片並標註真實國家名
 const DATABASE = [
-    { id: "p1", name: "E. Haaland", club: "曼城 (英超)", pos: "ST", ovr: 91, rarity: "SSR", img: "https://images.fineartamerica.com/images/artworkimages/mediumlarge/3/erling-haaland-headshot-dennis-vander-meersch.jpg" },
-    { id: "p2", name: "K. Mbappé", club: "皇馬 (西甲)", pos: "ST", ovr: 91, rarity: "SSR", img: "https://images.fineartamerica.com/images/artworkimages/mediumlarge/3/kylian-mbappe-dennis-vander-meersch.jpg" },
-    { id: "p3", name: "K. De Bruyne", club: "曼城 (英超)", pos: "CM", ovr: 90, rarity: "SSR", img: "https://images.fineartamerica.com/images/artworkimages/mediumlarge/3/kevin-de-bruyne-headshot-dennis-vander-meersch.jpg" },
-    { id: "p4", name: "Vinícius Jr.", club: "皇馬 (西甲)", pos: "LW", ovr: 90, rarity: "SSR", img: "https://images.fineartamerica.com/images/artworkimages/mediumlarge/3/vinicius-junior-dennis-vander-meersch.jpg" },
-    { id: "p5", name: "H. Kane", club: "拜仁 (德甲)", pos: "ST", ovr: 89, rarity: "SR", img: "https://images.fineartamerica.com/images/artworkimages/mediumlarge/3/harry-kane-dennis-vander-meersch.jpg" },
-    { id: "p6", name: "M. Salah", club: "利物浦 (英超)", pos: "RW", ovr: 89, rarity: "SR", img: "https://images.fineartamerica.com/images/artworkimages/mediumlarge/3/mohamed-salah-headshot-dennis-vander-meersch.jpg" },
-    { id: "p7", name: "J. Bellingham", club: "皇馬 (西甲)", pos: "CAM", ovr: 89, rarity: "SR", img: "https://images.fineartamerica.com/images/artworkimages/mediumlarge/3/jude-bellingham-dennis-vander-meersch.jpg" },
-    { id: "p8", name: "L. Modrić", club: "皇馬 (西甲)", pos: "CM", ovr: 86, rarity: "SR", img: "https://images.fineartamerica.com/images/artworkimages/mediumlarge/3/luka-modric-dennis-vander-meersch.jpg" },
-    { id: "p9", name: "Bukayo Saka", club: "阿森納 (英超)", pos: "RW", ovr: 87, rarity: "SR", img: "https://images.fineartamerica.com/images/artworkimages/mediumlarge/3/bukayo-saka-dennis-vander-meersch.jpg" },
-    { id: "p10", name: "Son Heung-min", club: "熱刺 (英超)", pos: "LW", ovr: 87, rarity: "R", img: "https://images.fineartamerica.com/images/artworkimages/mediumlarge/3/son-heung-min-dennis-vander-meersch.jpg" },
-    { id: "p11", name: "Pedri", club: "巴塞隆納 (西甲)", pos: "CM", ovr: 86, rarity: "R", img: "https://images.fineartamerica.com/images/artworkimages/mediumlarge/3/pedri-dennis-vander-meersch.jpg" },
-    { id: "p12", name: "zhen he (特規)", club: "自由球員", pos: "CAM", ovr: 99, rarity: "SSR", img: "https://images.fineartamerica.com/images/artworkimages/mediumlarge/3/lionel-messi-dennis-vander-meersch.jpg" }
+    { id: "p1", name: "E. Haaland", nation: "🇳🇴 挪威", club: "曼城 (英超)", pos: "ST", ovr: 91, rarity: "SSR", img: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=300&auto=format&fit=crop" },
+    { id: "p2", name: "K. Mbappé", nation: "🇫🇷 法國", club: "皇馬 (西甲)", pos: "ST", ovr: 91, rarity: "SSR", img: "https://images.unsplash.com/photo-1518091043644-c1d4457512c6?w=300&auto=format&fit=crop" },
+    { id: "p3", name: "K. De Bruyne", nation: "🇧🇪 比利時", club: "曼城 (英超)", pos: "CM", ovr: 90, rarity: "SSR", img: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=300&auto=format&fit=crop" },
+    { id: "p4", name: "Vinícius Jr.", nation: "🇧🇷 巴西", club: "皇馬 (西甲)", pos: "LW", ovr: 90, rarity: "SSR", img: "https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?w=300&auto=format&fit=crop" },
+    { id: "p5", name: "H. Kane", nation: "🏴󠁧󠁢󠁥󠁮󠁧󠁿 英格蘭", club: "拜仁 (德甲)", pos: "ST", ovr: 89, rarity: "SR", img: "https://images.unsplash.com/photo-1517927033932-b3d18e61fb3a?w=300&auto=format&fit=crop" },
+    { id: "p6", name: "M. Salah", nation: "🇪🇬 埃及", club: "利物浦 (英超)", pos: "RW", ovr: 89, rarity: "SR", img: "https://images.unsplash.com/photo-1511886929837-354d827aae26?w=300&auto=format&fit=crop" },
+    { id: "p7", name: "J. Bellingham", nation: "🏴󠁧󠁢󠁥󠁮󠁧󠁿 英格蘭", club: "皇馬 (西甲)", pos: "CAM", ovr: 89, rarity: "SR", img: "https://images.unsplash.com/photo-1560272564-669520557220?w=300&auto=format&fit=crop" },
+    { id: "p8", name: "L. Modrić", nation: "🇭🇷 克羅埃西亞", club: "皇馬 (西甲)", pos: "CM", ovr: 86, rarity: "SR", img: "https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=300&auto=format&fit=crop" },
+    { id: "p9", name: "Bukayo Saka", nation: "🏴󠁧󠁢󠁥󠁮󠁧󠁿 英格蘭", club: "阿森納 (英超)", pos: "RW", ovr: 87, rarity: "SR", img: "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=300&auto=format&fit=crop" },
+    { id: "p10", name: "Son Heung-min", nation: "🇰🇷 韓國", club: "熱刺 (英超)", pos: "LW", ovr: 87, rarity: "R", img: "https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=300&auto=format&fit=crop" },
+    { id: "p11", name: "Pedri", nation: "🇪🇸 西班牙", club: "巴塞隆納 (西甲)", pos: "CM", ovr: 86, rarity: "R", img: "https://images.unsplash.com/photo-1575361204480-aadea25e6e68?w=300&auto=format&fit=crop" },
+    { id: "p12", name: "Zhenhe Son", nation: "🇹🇼 台灣", club: "自由球員", pos: "CAM", ovr: 99, rarity: "SSR", img: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=300&auto=format&fit=crop" }
 ];
 
 let currentUser = null;
@@ -169,7 +170,7 @@ function handleLogin() {
     if (local) {
         playerData = JSON.parse(local);
     } else {
-        playerData = { coins: 1200, cards: ["p10"] }; // 初始贈送孫興慜
+        playerData = { coins: 1200, cards: ["p10"] };
         saveData();
     }
 
@@ -203,8 +204,9 @@ function buildCardHTML(p, isLocked = false) {
         <div class="soccer-card ${p.rarity} ${isLocked ? 'locked' : ''}">
             <span class="card-ovr">${p.ovr}<span class="card-pos">${p.pos}</span></span>
             <span class="card-rarity ${p.rarity}">${p.rarity}</span>
-            <img class="card-img" src="${p.img}" alt="${p.name}" onerror="this.src='https://via.placeholder.com/85?text=FC'">
+            <img class="card-img" src="${p.img}" alt="${p.name}">
             <div class="card-name">${p.name}</div>
+            <div class="card-nation">${p.nation}</div>
             <div class="card-club">${p.club}</div>
         </div>
     `;
@@ -227,11 +229,10 @@ function drawGacha(count) {
 
         let picked = pool[Math.floor(Math.random() * pool.length)];
 
-        // 重複抽取獎勵機制
         if (!playerData.cards.includes(picked.id)) {
             playerData.cards.push(picked.id);
         } else {
-            playerData.coins += 50; // 重複卡補償金幣
+            playerData.coins += 50;
         }
 
         resContainer.innerHTML += buildCardHTML(picked);
